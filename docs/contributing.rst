@@ -1,0 +1,31 @@
+Contributing
+============
+
+Coverage
+--------
+
+All test cases/scenarios & coverage are executed by tox.
+
+.. code-block:: bash
+
+   tox
+
+To run testing scenarios in IDE of your choice please see ``tox.ini``
+(especially take a look how ``MEMOIZE_FORCE_ASYNCIO`` is used).
+
+Docs
+----
+
+Before submitting pull request please update modules apidocs & ensure documentation generates properly.
+The following commands will do both (watch for errors & warnings).
+
+.. code-block:: bash
+
+   pip install sphinx sphinx_rtd_theme
+   cd docs
+   rm -rf source/*
+   sphinx-apidoc --doc-project "API docs" -o source/ ../memoize
+   make html
+
+
+
