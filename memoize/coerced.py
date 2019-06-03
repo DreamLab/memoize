@@ -33,9 +33,11 @@ try:
     def _call_soon(callback, *args):
         return IOLoop.current().spawn_callback(callback, *args)
 
-
     def _future():
         return Future()
+
+    def _timeout_error_type():
+        return gen.TimeoutError
 
 except ImportError:
     import asyncio
@@ -54,6 +56,8 @@ except ImportError:
     def _call_soon(callback, *args):
         asyncio.get_event_loop().call_soon(asyncio.ensure_future, callback(*args))
 
-
     def _future():
         return asyncio.Future()
+
+    def _timeout_error_type():
+        return asyncio.futures.TimeoutError

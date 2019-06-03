@@ -14,7 +14,7 @@ def prepare_description():
 
 setup(
     name='py-memoize',
-    version='1.0.0',
+    version='1.0.1',
     author='Michal Zmuda',
     author_email='zmu.michal@gmail.com',
     maintainer='DreamLab',
