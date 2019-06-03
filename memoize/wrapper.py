@@ -6,12 +6,9 @@ import asyncio
 import datetime
 import functools
 import logging
-from asyncio import futures
 from typing import Optional, Callable
 
-from tornado import gen
-
-from memoize.coerced import _apply_timeout, _call_soon
+from memoize.coerced import _apply_timeout, _call_soon, _timeout_error_type
 from memoize.configuration import CacheConfiguration, NotConfiguredCacheCalledException, \
     DefaultInMemoryCacheConfiguration, MutableCacheConfiguration
 from memoize.entry import CacheKey, CacheEntry
@@ -20,7 +17,7 @@ from memoize.statuses import UpdateStatuses
 
 
 def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration = None):
-    """Wraps function with memoization. Designed for tornado coroutines.
+    """Wraps function with memoization.
 
     If entry reaches time it should be updated, refresh is performed in background,
     but current entry is still valid and may be returned.
@@ -98,11 +95,7 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
                     _call_soon(try_release, to_release, configuration_snapshot)
 
                 return offered_entry
-            except gen.TimeoutError as e:
-                logger.debug('Timeout for %s: %s', key, e)
-                update_statuses.mark_update_aborted(key)
-                raise CachedMethodFailedException('Refresh timed out')
-            except futures.TimeoutError as e:
+            except _timeout_error_type() as e:
                 logger.debug('Timeout for %s: %s', key, e)
                 update_statuses.mark_update_aborted(key)
                 raise CachedMethodFailedException('Refresh timed out')

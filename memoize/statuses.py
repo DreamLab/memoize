@@ -6,8 +6,6 @@ import logging
 
 from typing import Optional
 
-from tornado.concurrent import Future
-
 from memoize import coerced
 from memoize.entry import CacheKey, CacheEntry
 
@@ -45,7 +43,7 @@ class UpdateStatuses:
         Calls to 'is_being_updated' will return False until 'mark_being_updated' will be called."""
         if key not in self._updates_in_progress:
             raise ValueError('Key {} is not being updated'.format(key))
-        update = self._updates_in_progress.pop(key)  # type: Future
+        update = self._updates_in_progress.pop(key)
         update.set_result(entry)
 
     def mark_update_aborted(self, key: CacheKey) -> None:
@@ -53,7 +51,7 @@ class UpdateStatuses:
         Calls to 'is_being_updated' will return False until 'mark_being_updated' will be called."""
         if key not in self._updates_in_progress:
             raise ValueError('Key {} is not being updated'.format(key))
-        update = self._updates_in_progress.pop(key)  # type: Future
+        update = self._updates_in_progress.pop(key)
         update.set_result(None)
 
     def await_updated(self, key: CacheKey) -> Optional[CacheEntry]:

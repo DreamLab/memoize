@@ -11,7 +11,7 @@
     :target: https://travis-ci.com/DreamLab/memoize
 
 
-Extended docs (including API docs) available at `memoize.readthedocs.io <https://memoize.readthedocs.io>`_.
+| Extended docs (including API docs) available at `memoize.readthedocs.io <https://memoize.readthedocs.io>`_.
 
 What & Why
 ==========
