@@ -39,7 +39,7 @@ To get you up & running all you need is to install:
 
 .. code-block:: bash
 
-   pip install memoize
+   pip install py-memoize
 
 Installation of Extras
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -48,13 +48,13 @@ If you are going to use ``memoize`` with tornado add a dependency on extra:
 
 .. code-block:: bash
 
-   pip install memoize[tornado]
+   pip install py-memoize[tornado]
 
 To harness the power of `ujson <https://pypi.org/project/ujson/>`_ (if JSON SerDe is used) install extra:
 
 .. code-block:: bash
 
-   pip install memoize[ujson]
+   pip install py-memoize[ujson]
 
 Usage
 -----

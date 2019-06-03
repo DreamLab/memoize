@@ -27,5 +27,17 @@ The following commands will do both (watch for errors & warnings).
    sphinx-apidoc --doc-project "API docs" -o source/ ../memoize
    make html
 
+PyPi
+----
 
+.. code-block:: bash
 
+    # build dist
+    python3 -m pip install --user --upgrade setuptools wheel
+    python3 setup.py sdist bdist_wheel
+
+    # try package
+    python3 -m pip install --user --upgrade twine
+    python3 -m twine check dist/*
+
+    # actual upload will be done by Travis

@@ -1,14 +1,22 @@
 language: python
 matrix:
-    include:
-        - python: 3.5
-          dist: trusty
-          sudo: false
-        - python: 3.6
-          dist: trusty
-          sudo: false
-        - python: 3.7
-          dist: xenial
-          sudo: true
+  include:
+  - python: 3.5
+    dist: trusty
+    sudo: false
+  - python: 3.6
+    dist: trusty
+    sudo: false
+  - python: 3.7
+    dist: xenial
+    sudo: true
 install: pip install tox-travis
 script: tox
+deploy:
+  provider: pypi
+  distributions: "sdist bdist_wheel"
+  user: zmumi
+  password:
+    secure: JQpMT/b928b2kVVAu3ITls1+fzlGURgpSzNXpd9qzy1wcDiLMxj+3o1lnRlHuKaE5uQdNoyFYZjDxbQ7UKLC0tjMjlNSVw0sMtQab/QGSe1ze0WJmGAJOIcoxPgssF07LqXCeJKyWfYkzN7EoM9o0aeMYaQ0p/UWvEz0TkpEeULLcmKAW1W20Sn5j23ujS+M+YUXEJp0c/VlzIYAAdeutpl7+3Fdgo9BVxLh6e8eHh87JC4/n9aBRRYzwpWvpDXi5pZjvbrLgKnWCk4ZSL2g/wbjwpPcgbInBRzQlbf2/t9TydDRQKrqZyZtYGwN+5TDosB8ft597MlKVxPR1M2C7QomGJmEglGijisjt/3PmNdZ1yS8icSpCyLSHy2Xmroui/ePdTP8zDj6joV+J6aUPXunY8UdtoCtRSjBDX6b7RRcIM9OO2ZTAGenlblCcc9iXPVH+H3LPsT1uXYtNUi1/hMo37kV1vQWh96ceKLoSqT4ERyXBeZc/m9PZ/YJudPQCxDiOU3DzBhYznj07eHELQdOxLI3rCpXHBKxj7YG8EOjVGUIZ4c1uke6LN2RnLigIN7FUUcgj8PUY6afn7QnN1nJHubRx1niTOsd6G7gRoLP/mUkKM3Wxz1PrPmpXp98aa7wIX76FKcJlRXRtuw1/xFYZGcYBcAAyodG1dRq/uE=
+  on:
+    tags: true
