@@ -1,3 +1,6 @@
+.. image:: https://img.shields.io/pypi/v/py-memoize.svg
+    :target: https://pypi.org/project/py-memoize
+
 .. image:: https://img.shields.io/pypi/pyversions/py-memoize.svg
     :target: https://pypi.org/project/py-memoize
 
@@ -6,6 +9,7 @@
 
 .. image:: https://travis-ci.com/DreamLab/memoize.svg?token=PCPPzZaRDc9FFFUfKaj9&branch=master
     :target: https://travis-ci.com/DreamLab/memoize
+
 
 Extended docs (including API docs) available at `memoize.readthedocs.io <https://memoize.readthedocs.io>`_.
 
