@@ -1,3 +1,9 @@
+.. image:: https://readthedocs.org/projects/memoize/badge/?version=latest
+    :target: https://memoize.readthedocs.io/en/latest/?badge=latest
+
+.. image:: https://travis-ci.com/DreamLab/memoize.svg?token=PCPPzZaRDc9FFFUfKaj9&branch=master
+    :target: https://travis-ci.com/DreamLab/memoize
+
 What & Why
 ==========
 
