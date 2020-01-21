@@ -1,3 +1,8 @@
+1.0.2
+-----
+
+* Added support for Python 3.8.
+
 1.0.1
 -----
 

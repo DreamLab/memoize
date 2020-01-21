@@ -6,7 +6,7 @@ memoize_configuration.force_asyncio = True
 import asyncio
 from datetime import timedelta
 
-from aiocache import cached, SimpleMemoryCache  # version 0.10.1 used as example of other cache implementation
+from aiocache import cached, SimpleMemoryCache  # version 0.11.1 (latest) used as example of other cache implementation
 
 from memoize.configuration import MutableCacheConfiguration, DefaultInMemoryCacheConfiguration
 from memoize.entrybuilder import ProvidedLifeSpanCacheEntryBuilder

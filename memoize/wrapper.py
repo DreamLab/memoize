@@ -95,7 +95,7 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
                     _call_soon(try_release, to_release, configuration_snapshot)
 
                 return offered_entry
-            except _timeout_error_type() as e:
+            except (asyncio.TimeoutError, _timeout_error_type()) as e:
                 logger.debug('Timeout for %s: %s', key, e)
                 update_statuses.mark_update_aborted(key)
                 raise CachedMethodFailedException('Refresh timed out')
