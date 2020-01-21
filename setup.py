@@ -14,9 +14,10 @@ def prepare_description():
 
 setup(
     name='py-memoize',
-    version='1.0.1',
+    version='1.0.2',
     author='Michal Zmuda',
     author_email='zmu.michal@gmail.com',
+    url='https://github.com/DreamLab/memoize',
     maintainer='DreamLab',
     packages=['memoize'],
     test_suite='tests',
@@ -30,7 +31,7 @@ setup(
     install_requires=None,
     extras_require={
         'tornado': ['tornado>4,<5'],
-        'ujson': ['ujson>=1.35'],
+        'ujson': ['ujson>=1.35,<2'],
     },
     classifiers=[
         'Topic :: Software Development :: Libraries',
@@ -39,6 +40,8 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Framework :: AsyncIO',
         'Intended Audience :: Developers'
     ]
 )

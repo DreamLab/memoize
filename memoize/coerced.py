@@ -60,4 +60,7 @@ except ImportError:
         return asyncio.Future()
 
     def _timeout_error_type():
-        return asyncio.futures.TimeoutError
+        try:
+            return asyncio.futures.TimeoutError
+        except AttributeError:
+            return asyncio.TimeoutError
