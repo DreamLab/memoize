@@ -31,6 +31,8 @@ class UpdateStatuses:
         self._updates_in_progress[key] = future
 
         def complete_on_timeout_passed():
+            if key not in self._updates_in_progress:
+                return
             if self._updates_in_progress[key] == future and not self._updates_in_progress[key].done():
                 self.logger.debug('Update task timed out - notifying clients awaiting for key %s', key)
                 self._updates_in_progress[key].set_result(None)
