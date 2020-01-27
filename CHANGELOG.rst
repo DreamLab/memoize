@@ -1,3 +1,8 @@
+1.0.3
+-----
+
+* Fixed unhandled KeyError in UpdateStatuses.
+
 1.0.2
 -----
 
