@@ -1,3 +1,8 @@
+1.0.4
+-----
+
+* Added support for Python 3.9.
+
 1.0.3
 -----
 
