@@ -13,6 +13,9 @@ matrix:
   - python: 3.8
     dist: bionic
     sudo: true
+  - python: 3.9
+    dist: focal
+    sudo: true
 install: pip install tox-travis
 script: tox
 deploy:

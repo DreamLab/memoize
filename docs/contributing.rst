@@ -4,11 +4,18 @@ Contributing
 Coverage
 --------
 
-All test cases/scenarios & coverage are executed by tox.
+All test cases/scenarios & coverage are executed by tox:
 
 .. code-block:: bash
 
    tox
+
+For users who use multiple interpreters:
+
+.. code-block:: bash
+
+   # python3.8 is just an example
+   python3.8 -m tox
 
 To run testing scenarios in IDE of your choice please see ``tox.ini``
 (especially take a look how ``MEMOIZE_FORCE_ASYNCIO`` is used).
