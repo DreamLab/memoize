@@ -87,9 +87,9 @@ class EncodingSerDe(SerDe):
         self.__serde = serde
 
     def deserialize(self, value: bytes) -> CacheEntry:
-        decoded: bytes = codecs.decode(value, self.__binary_encoding)  # type: ignore
-        return self.__serde.deserialize(decoded)
+        decoded = codecs.decode(value, self.__binary_encoding)
+        return self.__serde.deserialize(decoded)  # type: ignore
 
     def serialize(self, value: CacheEntry) -> bytes:
-        serialized: bytes = self.__serde.serialize(value)
+        serialized = self.__serde.serialize(value)
         return codecs.encode(serialized, self.__binary_encoding)  # type: ignore

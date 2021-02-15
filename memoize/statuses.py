@@ -4,7 +4,7 @@
 import datetime
 import logging
 from asyncio import Future
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Awaitable
 
 from memoize import coerced
 from memoize.entry import CacheKey, CacheEntry
@@ -14,7 +14,8 @@ class UpdateStatuses:
     def __init__(self, update_lock_timeout: datetime.timedelta = datetime.timedelta(minutes=5)) -> None:
         self.logger = logging.getLogger(__name__)
         self._update_lock_timeout = update_lock_timeout
-        self._updates_in_progress: Dict[CacheKey, Future[Any]] = {}
+        # type declaration should not be in comment once we drop py35 support
+        self._updates_in_progress = {}  # type: Dict[CacheKey, Future]
 
     def is_being_updated(self, key: CacheKey) -> bool:
         """Checks if update for given key is in progress. Obtained info is valid until control gets back to IO-loop."""
@@ -56,7 +57,7 @@ class UpdateStatuses:
         update = self._updates_in_progress.pop(key)
         update.set_result(None)
 
-    def await_updated(self, key: CacheKey) -> Future[Optional[CacheEntry]]:
+    def await_updated(self, key: CacheKey) -> Awaitable[Optional[CacheEntry]]:
         """Waits (asynchronously) until update in progress has benn finished.
         Returns updated entry or None if update failed/timed-out.
         Should be called only if 'is_being_updated' returned True (and since then IO-loop has not been lost)."""
