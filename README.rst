@@ -367,8 +367,8 @@ Currently *memoize* provides only in-memory storage for cache values (internally
 If you want (for instance) Redis integration, you need to implement one (please contribute!)
 but *memoize* will optimally use your async implementation from the start.
 
-Invalidation
-------------
+Manual Invalidation
+-------------------
 
 You could also invalidate entries manually.
 To do so you need to create instance of :class:`memoize.invalidation.InvalidationSupport`)
