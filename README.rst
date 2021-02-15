@@ -78,6 +78,8 @@ asyncio
 
 To apply default caching configuration use:
 
+..
+    _example_source: examples/basic/basic_asyncio.py
 
 .. code-block:: python
 
@@ -105,6 +107,9 @@ Tornado
 ~~~~~~~
 
 If your project is based on Tornado use:
+
+..
+    _example_source: examples/basic/basic_tornado.py
 
 .. code-block:: python
 
@@ -187,6 +192,9 @@ Please contribute!
 
 Example how to customize default config (everything gets overridden):
 
+..
+    _example_source: examples/configuration/custom_configuration.py
+
 .. code-block:: python
 
     from datetime import timedelta
@@ -222,6 +230,9 @@ Still, you can use default configuration which:
 
 If that satisfies you, just use default config:
 
+..
+    _example_source: examples/configuration/default_configuration.py
+
 .. code-block:: python
 
     from memoize.configuration import DefaultInMemoryCacheConfiguration
@@ -232,6 +243,24 @@ If that satisfies you, just use default config:
     async def cached():
         return 'dummy'
 
+Also, if you want to stick to the building blocks of the default configuration, but need to adjust some basic params:
+
+..
+    _example_source: examples/configuration/default_customized_configuration.py
+
+.. code-block:: python
+
+    from datetime import timedelta
+
+    from memoize.configuration import DefaultInMemoryCacheConfiguration
+    from memoize.wrapper import memoize
+
+
+    @memoize(configuration=DefaultInMemoryCacheConfiguration(capacity=4096, method_timeout=timedelta(minutes=2),
+                                                             update_after=timedelta(minutes=10),
+                                                             expire_after=timedelta(minutes=30)))
+    async def cached():
+        return 'dummy'
 
 Tunable eviction & async refreshing
 -----------------------------------
@@ -267,6 +296,9 @@ On failure, all requesters get an exception (same happens on timeout).
 
 An example of what it all is about:
 
+..
+    _example_source: examples/dogpiling/dogpiling_asyncio.py
+
 .. code-block:: python
 
     import asyncio
@@ -274,26 +306,21 @@ An example of what it all is about:
 
     from aiocache import cached, SimpleMemoryCache  # version 0.11.1 (latest) used as example of other cache implementation
 
-    from memoize.configuration import MutableCacheConfiguration, DefaultInMemoryCacheConfiguration
-    from memoize.entrybuilder import ProvidedLifeSpanCacheEntryBuilder
+    from memoize.configuration import DefaultInMemoryCacheConfiguration
     from memoize.wrapper import memoize
 
     # scenario configuration
     concurrent_requests = 5
     request_batches_execution_count = 50
-    cached_value_ttl_millis = 200
-    delay_between_request_batches_millis = 70
+    cached_value_ttl_ms = 200
+    delay_between_request_batches_ms = 70
 
     # results/statistics
     unique_calls_under_memoize = 0
     unique_calls_under_different_cache = 0
 
 
-    @memoize(configuration=MutableCacheConfiguration
-        .initialized_with(DefaultInMemoryCacheConfiguration())
-        .set_entry_builder(
-            ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(milliseconds=cached_value_ttl_millis))
-        ))
+    @memoize(configuration=DefaultInMemoryCacheConfiguration(update_after=timedelta(milliseconds=cached_value_ttl_ms)))
     async def cached_with_memoize():
         global unique_calls_under_memoize
         unique_calls_under_memoize += 1
@@ -301,7 +328,7 @@ An example of what it all is about:
         return unique_calls_under_memoize
 
 
-    @cached(ttl=cached_value_ttl_millis / 1000, cache=SimpleMemoryCache)
+    @cached(ttl=cached_value_ttl_ms / 1000, cache=SimpleMemoryCache)
     async def cached_with_different_cache():
         global unique_calls_under_different_cache
         unique_calls_under_different_cache += 1
@@ -313,11 +340,11 @@ An example of what it all is about:
         for i in range(request_batches_execution_count):
             await asyncio.gather(*[x() for x in [cached_with_memoize] * concurrent_requests])
             await asyncio.gather(*[x() for x in [cached_with_different_cache] * concurrent_requests])
-            await asyncio.sleep(delay_between_request_batches_millis / 1000)
+            await asyncio.sleep(delay_between_request_batches_ms / 1000)
 
         print("Memoize generated {} unique backend calls".format(unique_calls_under_memoize))
         print("Other cache generated {} unique backend calls".format(unique_calls_under_different_cache))
-        predicted = (delay_between_request_batches_millis * request_batches_execution_count) // cached_value_ttl_millis
+        predicted = (delay_between_request_batches_ms * request_batches_execution_count) // cached_value_ttl_ms
         print("Predicted (according to TTL) {} unique backend calls".format(predicted))
 
         # Printed:

@@ -1,3 +1,9 @@
+1.1.0
+-----
+
+* Added customization of basic params for DefaultInMemoryCacheConfiguration.
+
+
 1.0.4
 -----
 

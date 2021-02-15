@@ -5,14 +5,13 @@ from unittest.mock import Mock
 import tornado
 from tornado.testing import AsyncTestCase, gen_test
 
-from tests import  _ensure_asyncio_background_tasks_finished
 from memoize.configuration import MutableCacheConfiguration, NotConfiguredCacheCalledException, \
     DefaultInMemoryCacheConfiguration
-from memoize.entrybuilder import ProvidedLifeSpanCacheEntryBuilder
 from memoize.eviction import LeastRecentlyUpdatedEvictionStrategy
 from memoize.exceptions import CachedMethodFailedException
 from memoize.storage import LocalInMemoryCacheStorage
 from memoize.wrapper import memoize
+from tests import _ensure_asyncio_background_tasks_finished
 
 
 class MemoizationTests(AsyncTestCase):
@@ -34,11 +33,8 @@ class MemoizationTests(AsyncTestCase):
 
         get_value_cached = memoize(
             method=get_value,
-            configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(minutes=1),
-                                                                     expire_after=timedelta(minutes=2)))
-        )
+            configuration=DefaultInMemoryCacheConfiguration(update_after=timedelta(minutes=1),
+                                                            expire_after=timedelta(minutes=2)))
 
         # when
         res1 = await get_value_cached('test', kwarg='args')
@@ -61,11 +57,8 @@ class MemoizationTests(AsyncTestCase):
 
         get_value_cached = memoize(
             method=get_value,
-            configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(milliseconds=50),
-                                                                     expire_after=timedelta(milliseconds=100)))
-        )
+            configuration=DefaultInMemoryCacheConfiguration(update_after=timedelta(milliseconds=50),
+                                                            expire_after=timedelta(milliseconds=100)))
 
         # when
         res1 = await get_value_cached('test', kwarg='args')
@@ -88,11 +81,8 @@ class MemoizationTests(AsyncTestCase):
 
         get_value_cached = memoize(
             method=get_value,
-            configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(milliseconds=100),
-                                                                     expire_after=timedelta(minutes=5)))
-        )
+            configuration=DefaultInMemoryCacheConfiguration(update_after=timedelta(milliseconds=100),
+                                                            expire_after=timedelta(minutes=5)))
 
         # when
         res1 = await get_value_cached('test', kwarg='args')
@@ -115,11 +105,8 @@ class MemoizationTests(AsyncTestCase):
 
         get_value_cached = memoize(
             method=get_value,
-            configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(milliseconds=100),
-                                                                     expire_after=timedelta(minutes=5)))
-        )
+            configuration=DefaultInMemoryCacheConfiguration(update_after=timedelta(milliseconds=100),
+                                                            expire_after=timedelta(minutes=5)))
 
         # when
         res1 = await get_value_cached('test', kwarg='args')
@@ -290,10 +277,7 @@ class MemoizationTests(AsyncTestCase):
 
         get_value_cached = memoize(
             method=get_value,
-            configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_method_timeout(timedelta(milliseconds=100))
-        )
+            configuration=DefaultInMemoryCacheConfiguration(method_timeout=timedelta(milliseconds=100)))
 
         # when
         with self.assertRaises(Exception) as context:

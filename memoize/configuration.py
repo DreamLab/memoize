@@ -3,14 +3,14 @@
 of full cache configuration.
 """
 
-import datetime
 from abc import ABCMeta, abstractmethod
+from datetime import timedelta
 
 from memoize.entrybuilder import CacheEntryBuilder, ProvidedLifeSpanCacheEntryBuilder
 from memoize.eviction import EvictionStrategy, LeastRecentlyUpdatedEvictionStrategy
 from memoize.key import KeyExtractor, EncodedMethodReferenceAndArgsKeyExtractor
-from memoize.storage import LocalInMemoryCacheStorage
 from memoize.storage import CacheStorage
+from memoize.storage import LocalInMemoryCacheStorage
 
 
 class NotConfiguredCacheCalledException(Exception):
@@ -27,7 +27,7 @@ class CacheConfiguration(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    def method_timeout(self) -> datetime.timedelta:
+    def method_timeout(self) -> timedelta:
         """ Defines how much time wrapped method can take to complete. """
         raise NotImplementedError()
 
@@ -68,7 +68,7 @@ class MutableCacheConfiguration(CacheConfiguration):
 
     def __init__(self, configured: bool, storage: CacheStorage, key_extractor: KeyExtractor,
                  eviction_strategy: EvictionStrategy, entry_builder: CacheEntryBuilder,
-                 method_timeout: datetime.timedelta) -> None:
+                 method_timeout: timedelta) -> None:
         self.__storage = storage
         self.__configured = configured
         self.__key_extractor = key_extractor
@@ -87,7 +87,7 @@ class MutableCacheConfiguration(CacheConfiguration):
             eviction_strategy=configuration.eviction_strategy(),
         )
 
-    def method_timeout(self) -> datetime.timedelta:
+    def method_timeout(self) -> timedelta:
         return self.__method_timeout
 
     def key_extractor(self) -> KeyExtractor:
@@ -105,7 +105,7 @@ class MutableCacheConfiguration(CacheConfiguration):
     def eviction_strategy(self) -> EvictionStrategy:
         return self.__eviction_strategy
 
-    def set_method_timeout(self, value: datetime.timedelta) -> 'MutableCacheConfiguration':
+    def set_method_timeout(self, value: timedelta) -> 'MutableCacheConfiguration':
         self.__method_timeout = value
         return self
 
@@ -133,18 +133,20 @@ class MutableCacheConfiguration(CacheConfiguration):
 class DefaultInMemoryCacheConfiguration(CacheConfiguration):
     """ Default parameters that describe in-memory cache. Be ware that parameters used do not suit every case. """
 
-    def __init__(self) -> None:
+    def __init__(self, capacity: int = 4096, method_timeout: timedelta = timedelta(minutes=2),
+                 update_after: timedelta = timedelta(minutes=10),
+                 expire_after: timedelta = timedelta(minutes=30)) -> None:
         self.__configured = True
-        self.__method_timeout = datetime.timedelta(minutes=2)
+        self.__method_timeout = method_timeout
         self.__storage = LocalInMemoryCacheStorage()
         self.__key_extractor = EncodedMethodReferenceAndArgsKeyExtractor()
-        self.__eviction_strategy = LeastRecentlyUpdatedEvictionStrategy()
-        self.__entry_builder = ProvidedLifeSpanCacheEntryBuilder()
+        self.__eviction_strategy = LeastRecentlyUpdatedEvictionStrategy(capacity=capacity)
+        self.__entry_builder = ProvidedLifeSpanCacheEntryBuilder(update_after=update_after, expire_after=expire_after)
 
     def configured(self) -> bool:
         return self.__configured
 
-    def method_timeout(self) -> datetime.timedelta:
+    def method_timeout(self) -> timedelta:
         return self.__method_timeout
 
     def storage(self) -> LocalInMemoryCacheStorage:

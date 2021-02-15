@@ -4,8 +4,7 @@ from datetime import timedelta
 import tornado
 from tornado.testing import AsyncTestCase, gen_test
 
-from memoize.configuration import MutableCacheConfiguration, DefaultInMemoryCacheConfiguration
-from memoize.entrybuilder import ProvidedLifeSpanCacheEntryBuilder
+from memoize.configuration import DefaultInMemoryCacheConfiguration
 from memoize.exceptions import CachedMethodFailedException
 from memoize.wrapper import memoize
 from tests import _ensure_asyncio_background_tasks_finished
@@ -35,10 +34,8 @@ class MemoizationTests(AsyncTestCase):
         EXPIRE_S = EXPIRE_MS / 1000
 
         @memoize(
-            configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(milliseconds=UPDATE_MS),
-                                                                     expire_after=timedelta(milliseconds=EXPIRE_MS))))
+            configuration=DefaultInMemoryCacheConfiguration(update_after=timedelta(milliseconds=UPDATE_MS),
+                                                            expire_after=timedelta(milliseconds=EXPIRE_MS)))
         async def get_value_or_throw(arg, kwarg=None):
             if should_throw:
                 raise ValueError(value)
