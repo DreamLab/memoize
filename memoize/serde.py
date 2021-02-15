@@ -9,7 +9,8 @@ import pickle
 try:
     import ujson as json
 except:
-    import json
+    # ignoring type error as mypy falsely reports json is already imported
+    import json  # type: ignore
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
@@ -76,6 +77,7 @@ class JsonSerDe(SerDe):
         }), self.__string_encoding)
 
 
+# types are ignored as everything works just fine with bytes instead of strings
 class EncodingSerDe(SerDe):
     """Applies extra encoding to the data (for instance compression when 'zip' or 'bz2' codec used)."""
 
@@ -86,8 +88,8 @@ class EncodingSerDe(SerDe):
 
     def deserialize(self, value: bytes) -> CacheEntry:
         decoded = codecs.decode(value, self.__binary_encoding)
-        return self.__serde.deserialize(decoded)
+        return self.__serde.deserialize(decoded)  # type: ignore
 
     def serialize(self, value: CacheEntry) -> bytes:
         serialized = self.__serde.serialize(value)
-        return codecs.encode(serialized, self.__binary_encoding)
+        return codecs.encode(serialized, self.__binary_encoding)  # type: ignore

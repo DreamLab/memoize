@@ -44,6 +44,20 @@ class EncodingSerDeTests(AsyncTestCase):
         self.assertEqual(data, cache_entry)
         serde.deserialize.assert_called_once_with(b'y')
 
+    @gen_test
+    def test_e2e_integration_with_sample_serde(self):
+        # given
+        cache_entry = CacheEntry(datetime.now(), datetime.now(), datetime.now(), "value")
+        serde = PickleSerDe(pickle_protocol=HIGHEST_PROTOCOL)  # sample serde
+        wrapper = EncodingSerDe(serde, binary_encoding="base64")
+
+        # when
+        encoded_cache_entry = wrapper.serialize(cache_entry)
+        data = wrapper.deserialize(encoded_cache_entry)
+
+        # then
+        self.assertEqual(data, cache_entry)
+
 
 class JsonSerDeTests(AsyncTestCase):
     @gen_test

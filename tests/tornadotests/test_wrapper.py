@@ -5,14 +5,13 @@ from unittest.mock import Mock
 from tornado import gen
 from tornado.testing import AsyncTestCase, gen_test
 
-from memoize.storage import LocalInMemoryCacheStorage
-from tests import _ensure_background_tasks_finished
 from memoize.configuration import MutableCacheConfiguration, NotConfiguredCacheCalledException, \
     DefaultInMemoryCacheConfiguration
-from memoize.entrybuilder import ProvidedLifeSpanCacheEntryBuilder
 from memoize.eviction import LeastRecentlyUpdatedEvictionStrategy
 from memoize.exceptions import CachedMethodFailedException
+from memoize.storage import LocalInMemoryCacheStorage
 from memoize.wrapper import memoize
+from tests import _ensure_background_tasks_finished
 
 
 class MemoizationTests(AsyncTestCase):
@@ -26,12 +25,8 @@ class MemoizationTests(AsyncTestCase):
         # given
         value = 0
 
-        @memoize(
-            configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(minutes=1),
-                                                                     expire_after=timedelta(minutes=2)))
-        )
+        @memoize(configuration=DefaultInMemoryCacheConfiguration(update_after=timedelta(minutes=1),
+                                                                 expire_after=timedelta(minutes=2)))
         @gen.coroutine
         def get_value(arg, kwarg=None):
             return value
@@ -52,12 +47,8 @@ class MemoizationTests(AsyncTestCase):
         # given
         value = 0
 
-        @memoize(
-            configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(milliseconds=50),
-                                                                     expire_after=timedelta(milliseconds=100)))
-        )
+        @memoize(configuration=DefaultInMemoryCacheConfiguration(update_after=timedelta(milliseconds=50),
+                                                                 expire_after=timedelta(milliseconds=100)))
         @gen.coroutine
         def get_value(arg, kwarg=None):
             return value
@@ -78,12 +69,8 @@ class MemoizationTests(AsyncTestCase):
         # given
         value = 0
 
-        @memoize(
-            configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(milliseconds=100),
-                                                                     expire_after=timedelta(minutes=5)))
-        )
+        @memoize(configuration=DefaultInMemoryCacheConfiguration(update_after=timedelta(milliseconds=100),
+                                                                 expire_after=timedelta(minutes=5)))
         @gen.coroutine
         def get_value(arg, kwarg=None):
             return value
@@ -104,12 +91,8 @@ class MemoizationTests(AsyncTestCase):
         # given
         value = 0
 
-        @memoize(
-            configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(milliseconds=100),
-                                                                     expire_after=timedelta(minutes=5)))
-        )
+        @memoize(configuration=DefaultInMemoryCacheConfiguration(update_after=timedelta(milliseconds=100),
+                                                                 expire_after=timedelta(minutes=5)))
         @gen.coroutine
         def get_value(arg, kwarg=None):
             return value
@@ -273,11 +256,7 @@ class MemoizationTests(AsyncTestCase):
     def test_should_throw_exception_on_refresh_timeout(self):
         # given
 
-        @memoize(
-            configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_method_timeout(timedelta(milliseconds=100))
-        )
+        @memoize(configuration=DefaultInMemoryCacheConfiguration(method_timeout=timedelta(milliseconds=100)))
         @gen.coroutine
         def get_value(arg, kwarg=None):
             yield _ensure_background_tasks_finished()

@@ -1,3 +1,10 @@
+1.1.0
+-----
+
+* Added support for manual invalidation.
+* Added customization of basic params for DefaultInMemoryCacheConfiguration.
+* Included initial mypy checking (tornado/asyncio interoperability forces some ignores).
+
 1.0.4
 -----
 
