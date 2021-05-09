@@ -137,7 +137,7 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
             result = await refresh(current_entry, key, value_future_provider, configuration_snapshot)
         elif current_entry.expires_after <= now:
             logger.debug('Entry expiration reached - entry update (blocking) for key %s', key)
-            result = await refresh(current_entry, key, value_future_provider, configuration_snapshot)
+            result = await refresh(None, key, value_future_provider, configuration_snapshot)
         elif current_entry.update_after <= now:
             logger.debug('Entry update point expired - entry update (async - current entry returned) for key %s', key)
             _call_soon(refresh, current_entry, key, value_future_provider, configuration_snapshot)
