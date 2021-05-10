@@ -36,11 +36,14 @@ class MemoizationTests(AsyncTestCase):
         time.sleep(.200)
         yield _ensure_background_tasks_finished()
         value = 1
-        res2 = yield get_value('test', kwarg='args')
+        # calling thrice be more confident about behaviour of parallel execution
+        res2 = yield [get_value('test', kwarg='args'),
+                      get_value('test', kwarg='args'),
+                      get_value('test', kwarg='args'), ]
 
         # then
         self.assertEqual(0, res1)
-        self.assertEqual(0, res2)
+        self.assertEqual([0, 0, 0], res2)
 
     @gen_test
     def test_should_return_updated_value_on_expiration_time_reached(self):
@@ -58,11 +61,14 @@ class MemoizationTests(AsyncTestCase):
         time.sleep(.200)
         yield _ensure_background_tasks_finished()
         value = 1
-        res2 = yield get_value('test', kwarg='args')
+        # calling thrice be more confident about behaviour of parallel execution
+        res2 = yield [get_value('test', kwarg='args'),
+                      get_value('test', kwarg='args'),
+                      get_value('test', kwarg='args'), ]
 
         # then
         self.assertEqual(0, res1)
-        self.assertEqual(1, res2)
+        self.assertEqual([1, 1, 1], res2)
 
     @gen_test
     def test_should_return_current_value_on_first_call_after_update_time_reached_but_not_expiration_time(self):
@@ -80,11 +86,14 @@ class MemoizationTests(AsyncTestCase):
         time.sleep(.200)
         yield _ensure_background_tasks_finished()
         value = 1
-        res2 = yield get_value('test', kwarg='args')
+        # calling thrice be more confident about behaviour of parallel execution
+        res2 = yield [get_value('test', kwarg='args'),
+                      get_value('test', kwarg='args'),
+                      get_value('test', kwarg='args'), ]
 
         # then
         self.assertEqual(0, res1)
-        self.assertEqual(0, res2)
+        self.assertEqual([0, 0, 0], res2)
 
     @gen_test
     def test_should_return_current_value_on_second_call_after_update_time_reached_but_not_expiration_time(self):
@@ -104,11 +113,14 @@ class MemoizationTests(AsyncTestCase):
         value = 1
         yield get_value('test', kwarg='args')
         yield _ensure_background_tasks_finished()
-        res2 = yield get_value('test', kwarg='args')
+        # calling thrice be more confident about behaviour of parallel execution
+        res2 = yield [get_value('test', kwarg='args'),
+                      get_value('test', kwarg='args'),
+                      get_value('test', kwarg='args'), ]
 
         # then
         self.assertEqual(0, res1)
-        self.assertEqual(1, res2)
+        self.assertEqual([1, 1, 1], res2)
 
     @gen_test
     def test_should_return_different_values_on_different_args_with_default_key(self):

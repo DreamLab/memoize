@@ -1,3 +1,8 @@
+1.1.1
+-----
+
+* Fixed parallel queries returning expired entries (while expired entry was being refreshed).
+
 1.1.0
 -----
 
