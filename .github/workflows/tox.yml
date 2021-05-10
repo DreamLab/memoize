@@ -20,4 +20,4 @@ jobs:
         run: pip install tox
       - name: Run Tox
         # Run tox using the version of Python in `PATH`
-        run: tox
+        run: tox -e py-asyncio,py-tornado
