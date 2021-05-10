@@ -10,6 +10,9 @@
 .. image:: https://github.com/DreamLab/memoize/actions/workflows/tox-tests.yml/badge.svg
     :target: https://github.com/DreamLab/memoize/actions/workflows/tox-tests.yml
 
+.. image:: https://github.com/DreamLab/memoize/actions/workflows/non-test-tox.yml/badge.svg
+    :target: https://github.com/DreamLab/memoize/actions/workflows/non-test-tox.yml
+
 Extended docs (including API docs) available at `memoize.readthedocs.io <https://memoize.readthedocs.io>`_.
 
 What & Why
