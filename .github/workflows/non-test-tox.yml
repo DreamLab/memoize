@@ -1,4 +1,4 @@
-name: Non Test Tox
+name: Coverage, mypi
 
 on: [push]
 
