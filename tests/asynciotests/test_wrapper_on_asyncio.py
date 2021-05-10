@@ -1,10 +1,13 @@
+import asyncio
 import time
 from datetime import timedelta
 from unittest.mock import Mock
 
 import tornado
+from tornado.platform.asyncio import to_asyncio_future
 from tornado.testing import AsyncTestCase, gen_test
 
+from memoize import memoize_configuration
 from memoize.configuration import MutableCacheConfiguration, NotConfiguredCacheCalledException, \
     DefaultInMemoryCacheConfiguration
 from memoize.eviction import LeastRecentlyUpdatedEvictionStrategy
@@ -38,11 +41,12 @@ class MemoizationTests(AsyncTestCase):
         time.sleep(.200)
         await _ensure_asyncio_background_tasks_finished()
         value = 1
-        res2 = await get_value('test', kwarg='args')
+        # calling thrice be more confident about behaviour of parallel execution
+        res2 = await self._call_thrice(lambda: get_value('test', kwarg='args'))
 
         # then
         self.assertEqual(0, res1)
-        self.assertEqual(0, res2)
+        self.assertEqual([0, 0, 0], res2)
 
     @gen_test
     async def test_should_return_updated_value_on_expiration_time_reached(self):
@@ -59,11 +63,12 @@ class MemoizationTests(AsyncTestCase):
         time.sleep(.200)
         await _ensure_asyncio_background_tasks_finished()
         value = 1
-        res2 = await get_value('test', kwarg='args')
+        # calling thrice be more confident about behaviour of parallel execution
+        res2 = await self._call_thrice(lambda: get_value('test', kwarg='args'))
 
         # then
         self.assertEqual(0, res1)
-        self.assertEqual(1, res2)
+        self.assertEqual([1, 1, 1], res2)
 
     @gen_test
     async def test_should_return_current_value_on_first_call_after_update_time_reached_but_not_expiration_time(self):
@@ -80,11 +85,12 @@ class MemoizationTests(AsyncTestCase):
         time.sleep(.200)
         await _ensure_asyncio_background_tasks_finished()
         value = 1
-        res2 = await get_value('test', kwarg='args')
+        # calling thrice be more confident about behaviour of parallel execution
+        res2 = await self._call_thrice(lambda: get_value('test', kwarg='args'))
 
         # then
         self.assertEqual(0, res1)
-        self.assertEqual(0, res2)
+        self.assertEqual([0, 0, 0], res2)
 
     @gen_test
     async def test_should_return_current_value_on_second_call_after_update_time_reached_but_not_expiration_time(self):
@@ -103,11 +109,12 @@ class MemoizationTests(AsyncTestCase):
         value = 1
         await get_value('test', kwarg='args')
         await _ensure_asyncio_background_tasks_finished()
-        res2 = await get_value('test', kwarg='args')
+        # calling thrice be more confident about behaviour of parallel execution
+        res2 = await self._call_thrice(lambda: get_value('test', kwarg='args'))
 
         # then
         self.assertEqual(0, res1)
-        self.assertEqual(1, res2)
+        self.assertEqual([1, 1, 1], res2)
 
     @gen_test
     async def test_should_return_different_values_on_different_args_with_default_key(self):
@@ -263,3 +270,13 @@ class MemoizationTests(AsyncTestCase):
         # then
         expected = CachedMethodFailedException('Refresh timed out')
         self.assertEqual(str(expected), str(context.exception))  # ToDo: consider better comparision
+
+    @staticmethod
+    async def _call_thrice(call):
+        # gen_test setup somehow interferes with coroutines and futures
+        # code tested manually works without such "decorations" but for testing this workaround was the bes I've found
+        if memoize_configuration.force_asyncio:
+            res2 = await asyncio.gather(call(), call(), call())
+        else:
+            res2 = await asyncio.gather(to_asyncio_future(call()), to_asyncio_future(call()), to_asyncio_future(call()))
+        return res2
