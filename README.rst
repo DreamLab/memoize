@@ -7,8 +7,8 @@
 .. image:: https://readthedocs.org/projects/memoize/badge/?version=latest
     :target: https://memoize.readthedocs.io/en/latest/?badge=latest
 
-.. image:: https://travis-ci.com/DreamLab/memoize.svg?token=PCPPzZaRDc9FFFUfKaj9&branch=master
-    :target: https://travis-ci.com/DreamLab/memoize
+.. image:: https://github.com/DreamLab/memoize/actions/workflows/tox-tests.yml/badge.svg
+    :target: https://github.com/DreamLab/memoize/actions/workflows/tox-tests.yml
 
 Extended docs (including API docs) available at `memoize.readthedocs.io <https://memoize.readthedocs.io>`_.
 
