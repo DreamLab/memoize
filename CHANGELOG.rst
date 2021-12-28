@@ -1,4 +1,4 @@
-1.2.0
+1.1.2
 -----
 
 * Added support for Python 3.10:
