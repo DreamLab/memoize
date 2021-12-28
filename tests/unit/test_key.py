@@ -1,3 +1,7 @@
+from tests.py310workaround import fix_python_3_10_compatibility
+
+fix_python_3_10_compatibility()
+
 from unittest.mock import Mock
 
 import tornado
