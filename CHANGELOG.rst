@@ -1,3 +1,8 @@
+1.1.3
+-----
+
+* Fixed declared supported python versions (`classifiers` in `setup.py`).
+
 1.1.2
 -----
 
