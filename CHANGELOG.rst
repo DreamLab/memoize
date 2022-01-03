@@ -1,3 +1,11 @@
+1.1.2
+-----
+
+* Added support for Python 3.10:
+   * Applied workaround for testing setup (`MutableMapping` alias required by `tornado.testing.gen_test`);
+   * Updated `mypy` and `coverage` setup to Python 3.10.
+* Added support for Python 3.11 (provisional as only alpha releases of 3.11 were tested).
+
 1.1.1
 -----
 

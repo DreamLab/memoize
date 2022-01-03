@@ -10,8 +10,8 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: '3.10'
       - name: Install Tox and any other packages
         run: pip install tox
       - name: Run Tox
-        run: tox -e coverage-py37,mypy-py37
+        run: tox -e coverage-py310,mypy-py310

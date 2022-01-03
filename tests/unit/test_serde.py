@@ -1,3 +1,7 @@
+from tests.py310workaround import fix_python_3_10_compatibility
+
+fix_python_3_10_compatibility()
+
 import codecs
 import json
 import pickle
