@@ -3,14 +3,15 @@
 """
 
 import datetime
+import importlib.util
 import logging
 
 from memoize.memoize_configuration import force_asyncio
 
 logger = logging.getLogger('memoize')
 try:
-    if force_asyncio:
-        logger.warning('Forcefully omitting tornado availability check & switching to asyncio')
+    if force_asyncio and importlib.util.find_spec('tornado'):
+        logger.warning('Forcefully switching to asyncio even though tornado exists')
         raise ImportError()
 
     from tornado.ioloop import IOLoop
