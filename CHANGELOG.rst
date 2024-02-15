@@ -1,7 +1,12 @@
+1.1.4
+-----
+
+* Fixed redundant waring if `tornado` is not available to be used (silenced).
+
 1.1.3
 -----
 
-* Fixed declared supported python versions (`classifiers` in `setup.py`).
+*  declared supported python versions (`classifiers` in `setup.py`).
 
 1.1.2
 -----
