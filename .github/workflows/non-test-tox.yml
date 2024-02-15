@@ -12,6 +12,6 @@ jobs:
         with:
           python-version: '3.10'
       - name: Install Tox and any other packages
-        run: pip install tox setuptools distutils
+        run: pip install tox
       - name: Run Tox
         run: tox -e coverage-py310,mypy-py310
