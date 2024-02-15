@@ -1,3 +1,9 @@
+1.1.4
+-----
+
+* Fixed redundant waring if `tornado` is not available to be used (silenced).
+* Fixed GitHub Actions build (python 3.5 & 3.6 no longer available).
+
 1.1.3
 -----
 

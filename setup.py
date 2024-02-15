@@ -14,7 +14,7 @@ def prepare_description():
 
 setup(
     name='py-memoize',
-    version='1.1.3',
+    version='1.1.4',
     author='Michal Zmuda',
     author_email='zmu.michal@gmail.com',
     url='https://github.com/DreamLab/memoize',
@@ -37,8 +37,6 @@ setup(
         'Topic :: Software Development :: Libraries',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
