@@ -7,7 +7,7 @@
 1.1.3
 -----
 
-*  declared supported python versions (`classifiers` in `setup.py`).
+* Fixed declared supported python versions (`classifiers` in `setup.py`).
 
 1.1.2
 -----
