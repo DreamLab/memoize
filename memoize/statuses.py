@@ -57,7 +57,7 @@ class UpdateStatuses:
         update = self._updates_in_progress.pop(key)
         update.set_result(None)
 
-    def await_updated(self, key: CacheKey) -> Awaitable[Optional[CacheEntry]]:
+    async def await_updated(self, key: CacheKey) -> Awaitable[Optional[CacheEntry]]:
         """Waits (asynchronously) until update in progress has benn finished.
         Returns updated entry or None if update failed/timed-out.
         Should be called only if 'is_being_updated' returned True (and since then IO-loop has not been lost)."""
