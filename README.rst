@@ -428,10 +428,10 @@ Then you could just pass args and kwargs for which you want to invalidate entry.
         asyncio.get_event_loop().run_until_complete(main())
 
 
-Openness for granular TTL
--------------------------
+Openness to granular TTL
+------------------------
 
-Default configuration sets update and expiry based on fixed values, which are same for all entries.
+Default configuration sets update and expiry based on fixed values, which are the same for all entries.
 If you need to set different TTLs for different entries, you can do so by providing
 a custom :class:`memoize.entrybuilder.CacheEntryBuilder`.
 
