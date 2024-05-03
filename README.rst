@@ -76,6 +76,9 @@ For configuration options see `Configurability`_.
 You can use ``memoize`` with both `asyncio <https://docs.python.org/3/library/asyncio.html>`_
 and `Tornado <https://github.com/tornadoweb/tornado>`_ -  please see the appropriate example:
 
+.. warning::
+    Support for `Tornado <https://github.com/tornadoweb/tornado>`_ is planned to be removed in the future.
+
 asyncio
 ~~~~~~~
 
