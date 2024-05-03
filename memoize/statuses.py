@@ -49,17 +49,18 @@ class UpdateStatuses:
         update = self._updates_in_progress.pop(key)
         update.set_result(entry)
 
-    def mark_update_aborted(self, key: CacheKey) -> None:
+    def mark_update_aborted(self, key: CacheKey, e: Exception) -> None:
         """Informs that update failed to complete.
-        Calls to 'is_being_updated' will return False until 'mark_being_updated' will be called."""
+        Calls to 'is_being_updated' will return False until 'mark_being_updated' will be called.
+        Accepts exception to propagate it across all clients awaiting an update."""
         if key not in self._updates_in_progress:
             raise ValueError('Key {} is not being updated'.format(key))
         update = self._updates_in_progress.pop(key)
-        update.set_result(None)
+        update.set_result(e)
 
     def await_updated(self, key: CacheKey) -> Awaitable[Optional[CacheEntry]]:
         """Waits (asynchronously) until update in progress has benn finished.
-        Returns updated entry or None if update failed/timed-out.
+        Returns updated entry or an exception (instead of entry) if update failed/timed-out.
         Should be called only if 'is_being_updated' returned True (and since then IO-loop has not been lost)."""
         if not self.is_being_updated(key):
             raise ValueError('Key {} is not being updated'.format(key))

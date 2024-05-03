@@ -62,14 +62,14 @@ class UpdateStatusesTests(AsyncTestCase):
     def test_should_raise_exception_during_mark_update_as_aborted(self):
         # given/when/then
         with self.assertRaises(ValueError):
-            self.update_statuses.mark_update_aborted('key')
+            self.update_statuses.mark_update_aborted('key', Exception('stub'))
 
     def test_should_mark_update_as_aborted(self):
         # given
         self.update_statuses.mark_being_updated('key')
 
         # when
-        self.update_statuses.mark_update_aborted('key')
+        self.update_statuses.mark_update_aborted('key', Exception('stub'))
 
         # then
         self.assertFalse(self.update_statuses.is_being_updated('key'))

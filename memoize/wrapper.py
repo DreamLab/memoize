@@ -103,11 +103,11 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
                 return offered_entry
             except (asyncio.TimeoutError, _timeout_error_type()) as e:
                 logger.debug('Timeout for %s: %s', key, e)
-                update_statuses.mark_update_aborted(key)
+                update_statuses.mark_update_aborted(key, e)
                 raise CachedMethodFailedException('Refresh timed out')
             except Exception as e:
                 logger.debug('Error while refreshing cache for %s: %s', key, e)
-                update_statuses.mark_update_aborted(key)
+                update_statuses.mark_update_aborted(key, e)
                 raise CachedMethodFailedException('Refresh failed to complete', e)
 
     @functools.wraps(method)
@@ -145,6 +145,8 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
         else:
             result = current_entry
 
+        if isinstance(result, Exception):
+            raise CachedMethodFailedException('Refresh failed to complete', result)
         return result.value
 
     return wrapper
