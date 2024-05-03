@@ -47,4 +47,4 @@ PyPi
     python3 -m pip install --user --upgrade twine
     python3 -m twine check dist/*
 
-    # actual upload will be done by Travis
+    # actual upload will be done by GitHub Actions

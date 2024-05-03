@@ -1,3 +1,9 @@
+1.1.5
+-----
+
+* Expanded docs adding section on how to achieve granular expire/update time control (different settings per entry).
+* Minor fix for contribution guide (after migration, Travis was still mentioned instead of GitHub Actions).
+
 1.1.4
 -----
 
