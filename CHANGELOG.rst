@@ -4,7 +4,7 @@
 * Changed exception handling
   * now exceptions are chained (before they were added in `args`)
   * timeout errors are now chained (before they were not included at all)
-  * in case of dopiling, all callers are now notified about the error (see issue #23)
+  * in case of dogpiling, all callers are now notified about the error (see issue #23)
 
 1.2.2
 -----
