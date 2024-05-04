@@ -12,7 +12,7 @@ except:
     # ignoring type error as mypy falsely reports json is already imported
     import json  # type: ignore
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
+from datetime import datetime, UTC
 
 from typing import Callable, Any
 
@@ -62,9 +62,9 @@ class JsonSerDe(SerDe):
     def deserialize(self, data: bytes) -> CacheEntry:
         as_dict = json.loads(codecs.decode(data, self.__string_encoding))
         return CacheEntry(
-            created=datetime.utcfromtimestamp(as_dict['created']),
-            update_after=datetime.utcfromtimestamp(as_dict['update_after']),
-            expires_after=datetime.utcfromtimestamp(as_dict['expires_after']),
+            created=datetime.fromtimestamp(as_dict['created'], UTC),
+            update_after=datetime.fromtimestamp(as_dict['update_after'], UTC),
+            expires_after=datetime.fromtimestamp(as_dict['expires_after'], UTC),
             value=self.__reversible_repr_to_value(as_dict['value']),
         )
 
