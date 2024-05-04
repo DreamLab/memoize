@@ -34,7 +34,7 @@ class ProvidedLifeSpanCacheEntryBuilder(CacheEntryBuilder):
         self._update_after = update_after
 
     def build(self, key: CacheKey, value: CachedValue) -> CacheEntry:
-        now = datetime.datetime.now(datetime.UTC)
+        now = datetime.datetime.now(datetime.timezone.utc)
         return CacheEntry(created=now,
                           update_after=now + self._update_after,
                           expires_after=now + self._expires_after,
