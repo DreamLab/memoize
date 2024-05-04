@@ -6,6 +6,11 @@
   * timeout errors are now chained (before they were not included at all)
   * in case of dopiling, all callers are now notified about the error (see issue #23)
 
+1.2.2
+-----
+
+* Fixed an example, that used deprecated `utcnow`
+
 1.2.1
 -----
 
