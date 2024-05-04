@@ -1,3 +1,10 @@
+1.2.0
+-----
+
+* Added support for Python 3.12
+* Added warning that support for Tornado is deprecated and will be removed in future
+  (it causes more and more hacks/workarounds while Tornado importance is diminishing).
+
 1.1.5
 -----
 

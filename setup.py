@@ -1,7 +1,4 @@
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup
 
 
 def prepare_description():
@@ -14,7 +11,7 @@ def prepare_description():
 
 setup(
     name='py-memoize',
-    version='1.1.5',
+    version='1.2.0',
     author='Michal Zmuda',
     author_email='zmu.michal@gmail.com',
     url='https://github.com/DreamLab/memoize',
@@ -42,6 +39,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Framework :: AsyncIO',
         'Intended Audience :: Developers'
     ]
