@@ -124,7 +124,7 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
         if current_entry is not None:
             configuration_snapshot.eviction_strategy().mark_read(key)
 
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
 
         def value_future_provider():
             return _apply_timeout(configuration_snapshot.method_timeout(), method(*args, **kwargs))
