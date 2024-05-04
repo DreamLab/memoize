@@ -5,7 +5,7 @@ fix_python_3_10_compatibility()
 import codecs
 import json
 import pickle
-from datetime import datetime
+from datetime import datetime, timezone
 from pickle import HIGHEST_PROTOCOL, DEFAULT_PROTOCOL
 from unittest.mock import Mock
 
@@ -67,8 +67,8 @@ class JsonSerDeTests(AsyncTestCase):
     @gen_test
     def test_should_encode_as_readable_json(self):
         # given
-        cache_entry = CacheEntry(datetime.utcfromtimestamp(1), datetime.utcfromtimestamp(2),
-                                 datetime.utcfromtimestamp(3), "in")
+        cache_entry = CacheEntry(datetime.fromtimestamp(1, timezone.utc), datetime.fromtimestamp(2, timezone.utc),
+                                 datetime.fromtimestamp(3, timezone.utc), "in")
         serde = JsonSerDe(string_encoding='utf-8')
 
         # when
@@ -90,15 +90,15 @@ class JsonSerDeTests(AsyncTestCase):
         bytes = serde.deserialize(b'{"created":1,"update_after":2,"expires_after":3,"value":"value"}')
 
         # then
-        cache_entry = CacheEntry(datetime.utcfromtimestamp(1), datetime.utcfromtimestamp(2),
-                                 datetime.utcfromtimestamp(3), "value")
+        cache_entry = CacheEntry(datetime.fromtimestamp(1, timezone.utc), datetime.fromtimestamp(2, timezone.utc),
+                                 datetime.fromtimestamp(3, timezone.utc), "value")
         self.assertEqual(bytes, cache_entry)
 
     @gen_test
     def test_should_apply_value_transformations_on_serialization(self):
         # given
-        cache_entry = CacheEntry(datetime.utcfromtimestamp(1), datetime.utcfromtimestamp(2),
-                                 datetime.utcfromtimestamp(3), "in")
+        cache_entry = CacheEntry(datetime.fromtimestamp(1, timezone.utc), datetime.fromtimestamp(2, timezone.utc),
+                                 datetime.fromtimestamp(3, timezone.utc), "in")
         encode = Mock(return_value="out")
         decode = Mock(return_value="in")
         serde = JsonSerDe(string_encoding='utf-8', value_to_reversible_repr=encode, reversible_repr_to_value=decode)
@@ -125,8 +125,8 @@ class JsonSerDeTests(AsyncTestCase):
         data = serde.deserialize(b'{"created":1,"update_after":2,"expires_after":3,"value":"in"}')
 
         # then
-        cache_entry = CacheEntry(datetime.utcfromtimestamp(1), datetime.utcfromtimestamp(2),
-                                 datetime.utcfromtimestamp(3), "out")
+        cache_entry = CacheEntry(datetime.fromtimestamp(1, timezone.utc), datetime.fromtimestamp(2, timezone.utc),
+                                 datetime.fromtimestamp(3, timezone.utc), "out")
         self.assertEqual(data, cache_entry)
         decode.assert_called_once_with("in")
 

@@ -1,3 +1,8 @@
+1.2.1
+-----
+
+* Fixed UTC related deprecation warnings in Python 3.12+
+
 1.2.0
 -----
 
