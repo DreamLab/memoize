@@ -57,7 +57,7 @@ class UpdateStatuses:
         update = self._updates_in_progress.pop(key)
         update.set_result(exception)
 
-    def await_updated(self, key: CacheKey) -> Awaitable[Union[CacheEntry | Exception]]:
+    def await_updated(self, key: CacheKey) -> Awaitable[Union[CacheEntry, Exception]]:
         """Waits (asynchronously) until update in progress has benn finished.
         Returns awaitable with the updated entry
         (or awaitable with an exception if update failed/timed-out).
