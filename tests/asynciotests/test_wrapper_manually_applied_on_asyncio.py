@@ -1,3 +1,4 @@
+from memoize.coerced import _timeout_error_type
 from tests.py310workaround import fix_python_3_10_compatibility
 
 fix_python_3_10_compatibility()
@@ -274,8 +275,8 @@ class MemoizationTests(AsyncTestCase):
             await get_value_cached('test1', kwarg='args1')
 
         # then
-        expected = CachedMethodFailedException('Refresh failed to complete', ValueError('Get lost', ))
-        self.assertEqual(str(expected), str(context.exception))  # ToDo: consider better comparision
+        self.assertEqual(str(context.exception), str(CachedMethodFailedException('Refresh failed to complete')))
+        self.assertEqual(str(context.exception.__cause__), str(ValueError("Get lost")))
 
     @gen_test
     async def test_should_throw_exception_on_refresh_timeout(self):
@@ -295,8 +296,8 @@ class MemoizationTests(AsyncTestCase):
             await get_value_cached('test1', kwarg='args1')
 
         # then
-        expected = CachedMethodFailedException('Refresh timed out', TimeoutError('Timeout'))
-        self.assertEqual(str(expected), str(context.exception))  # ToDo: consider better comparision
+        self.assertEqual(context.exception.__class__, CachedMethodFailedException)
+        self.assertEqual(context.exception.__cause__.__class__, _timeout_error_type())
 
     @staticmethod
     async def _call_thrice(call):

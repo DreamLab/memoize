@@ -94,5 +94,5 @@ class MemoizationTests(AsyncTestCase):
         self.assertEqual('ok #2', res4)  # value from cache - still relevant
         self.assertEqual('ok #2', res5)  # stale from cache - refresh in background
         self.assertEqual('ok #2', res6)  # stale from cache - should be updated but method throws
-        expected = CachedMethodFailedException('Refresh failed to complete', ValueError('throws #4', ))
-        self.assertEqual(str(expected), str(context.exception))  # ToDo: consider better comparision
+        self.assertEqual(str(context.exception), str(CachedMethodFailedException('Refresh failed to complete')))
+        self.assertEqual(str(context.exception.__cause__), str(ValueError("throws #4")))
