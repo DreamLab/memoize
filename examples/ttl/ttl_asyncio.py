@@ -1,3 +1,7 @@
+# needed if one has tornado installed (could be removed otherwise)
+from memoize import memoize_configuration
+memoize_configuration.force_asyncio = True
+
 import datetime
 import asyncio
 import random
@@ -9,10 +13,6 @@ from memoize.entry import CacheKey, CacheEntry
 from memoize.entrybuilder import CacheEntryBuilder
 from memoize.storage import LocalInMemoryCacheStorage
 
-# needed if one has tornado installed (could be removed otherwise)
-from memoize import memoize_configuration
-memoize_configuration.force_asyncio = True
-
 
 @dataclass
 class ValueWithTTL:
@@ -22,7 +22,7 @@ class ValueWithTTL:
 
 class TtlRespectingCacheEntryBuilder(CacheEntryBuilder):
     def build(self, key: CacheKey, value: ValueWithTTL):
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         ttl_ends_at = now + datetime.timedelta(seconds=value.ttl_seconds)
         return CacheEntry(
             created=now,

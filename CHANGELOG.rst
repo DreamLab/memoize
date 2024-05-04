@@ -1,3 +1,8 @@
+1.2.2
+-----
+
+* Fixed an example, that used deprecated `utcnow`
+
 1.2.1
 -----
 

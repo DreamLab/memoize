@@ -460,7 +460,7 @@ a custom :class:`memoize.entrybuilder.CacheEntryBuilder`.
 
     class TtlRespectingCacheEntryBuilder(CacheEntryBuilder):
         def build(self, key: CacheKey, value: ValueWithTTL):
-            now = datetime.datetime.utcnow()
+            now = datetime.datetime.now(datetime.timezone.utc)
             ttl_ends_at = now + datetime.timedelta(seconds=value.ttl_seconds)
             return CacheEntry(
                 created=now,
