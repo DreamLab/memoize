@@ -233,8 +233,8 @@ class MemoizationTests(AsyncTestCase):
 
         @memoize(
             configuration=MutableCacheConfiguration
-            .initialized_with(DefaultInMemoryCacheConfiguration())
-            .set_key_extractor(key_extractor)
+                .initialized_with(DefaultInMemoryCacheConfiguration())
+                .set_key_extractor(key_extractor)
         )
         async def get_value(arg, kwarg=None):
             return value
@@ -260,10 +260,10 @@ class MemoizationTests(AsyncTestCase):
 
         @memoize(
             configuration=MutableCacheConfiguration
-            .initialized_with(DefaultInMemoryCacheConfiguration())
-            .set_eviction_strategy(LeastRecentlyUpdatedEvictionStrategy(capacity=2))
-            .set_key_extractor(key_extractor)
-            .set_storage(storage)
+                .initialized_with(DefaultInMemoryCacheConfiguration())
+                .set_eviction_strategy(LeastRecentlyUpdatedEvictionStrategy(capacity=2))
+                .set_key_extractor(key_extractor)
+                .set_storage(storage)
         )
         async def get_value(arg, kwarg=None):
             return value
@@ -291,8 +291,8 @@ class MemoizationTests(AsyncTestCase):
         # given
         @memoize(
             configuration=MutableCacheConfiguration
-            .initialized_with(DefaultInMemoryCacheConfiguration())
-            .set_configured(False)
+                .initialized_with(DefaultInMemoryCacheConfiguration())
+                .set_configured(False)
         )
         async def get_value(arg, kwarg=None):
             raise ValueError("Get lost")
@@ -338,7 +338,6 @@ class MemoizationTests(AsyncTestCase):
         # then
         self.assertEqual(context.exception.__class__, CachedMethodFailedException)
         self.assertEqual(context.exception.__cause__.__class__, _timeout_error_type())
-
 
     @staticmethod
     async def _call_thrice(call):
