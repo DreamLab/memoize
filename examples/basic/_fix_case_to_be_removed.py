@@ -25,12 +25,17 @@ from asyncio import sleep, gather
 ))
 async def test():
     await sleep(1)
-    raise Exception("test")
+    raise ValueError("something went wrong")
 
 
 async def main():
     results = await gather(test(), test(), test(), test(), return_exceptions=True)
-    print(results)
+    for result in results:
+        print(result)
+        print(result.__cause__)
+
+    # see nice traceback in the console
+    await test()
 
 
 if __name__ == "__main__":

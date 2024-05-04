@@ -1,3 +1,11 @@
+2.0.0
+-----
+
+* Changed exception handling
+  * now exceptions are chained (before they were added in `args`)
+  * timeout errors are now chained (before they were not included at all)
+  * in case of dopiling, all callers are now notified about the error
+
 1.2.1
 -----
 
