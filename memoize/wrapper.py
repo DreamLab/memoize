@@ -77,8 +77,8 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
         if actual_entry is None and update_statuses.is_being_updated(key):
             logger.debug('As entry expired, waiting for results of concurrent refresh %s', key)
             entry = await update_statuses.await_updated(key)
-            if entry is None:
-                raise CachedMethodFailedException('Concurrent refresh failed to complete')
+            if isinstance(entry, Exception):
+                raise CachedMethodFailedException('Concurrent refresh failed to complete', entry)
             return entry
         elif actual_entry is not None and update_statuses.is_being_updated(key):
             logger.debug('As update point reached but concurrent update already in progress, '
@@ -104,7 +104,7 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
             except (asyncio.TimeoutError, _timeout_error_type()) as e:
                 logger.debug('Timeout for %s: %s', key, e)
                 update_statuses.mark_update_aborted(key, e)
-                raise CachedMethodFailedException('Refresh timed out')
+                raise CachedMethodFailedException('Refresh timed out', e)
             except Exception as e:
                 logger.debug('Error while refreshing cache for %s: %s', key, e)
                 update_statuses.mark_update_aborted(key, e)
@@ -145,8 +145,6 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
         else:
             result = current_entry
 
-        if isinstance(result, Exception):
-            raise CachedMethodFailedException('Refresh failed to complete', result)
         return result.value
 
     return wrapper

@@ -161,6 +161,31 @@ class MemoizationTests(AsyncTestCase):
         self.assertEqual(1, res2)
 
     @gen_test
+    async def test_should_return_exception_for_all_concurrent_callers(self):
+        # given
+        value = 0
+
+        @memoize()
+        async def get_value(arg, kwarg=None):
+            raise ValueError(f'stub{value}')
+
+        # when
+        res1 = get_value('test', kwarg='args1')
+        res2 = get_value('test', kwarg='args1')
+        res3 = get_value('test', kwarg='args1')
+
+        # then
+        with self.assertRaises(Exception) as context:
+            await res1
+            self.assertEqual(context.exception, ValueError('stub0'))
+        with self.assertRaises(Exception) as context:
+            await res2
+            self.assertEqual(context.exception, ValueError('stub0'))
+        with self.assertRaises(Exception) as context:
+            await res2
+            self.assertEqual(context.exception, ValueError('stub0'))
+
+    @gen_test
     async def test_should_return_same_value_on_constant_key_function(self):
         # given
         value = 0
@@ -169,8 +194,8 @@ class MemoizationTests(AsyncTestCase):
 
         @memoize(
             configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_key_extractor(key_extractor)
+            .initialized_with(DefaultInMemoryCacheConfiguration())
+            .set_key_extractor(key_extractor)
         )
         async def get_value(arg, kwarg=None):
             return value
@@ -196,10 +221,10 @@ class MemoizationTests(AsyncTestCase):
 
         @memoize(
             configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_eviction_strategy(LeastRecentlyUpdatedEvictionStrategy(capacity=2))
-                .set_key_extractor(key_extractor)
-                .set_storage(storage)
+            .initialized_with(DefaultInMemoryCacheConfiguration())
+            .set_eviction_strategy(LeastRecentlyUpdatedEvictionStrategy(capacity=2))
+            .set_key_extractor(key_extractor)
+            .set_storage(storage)
         )
         async def get_value(arg, kwarg=None):
             return value
@@ -227,8 +252,8 @@ class MemoizationTests(AsyncTestCase):
         # given
         @memoize(
             configuration=MutableCacheConfiguration
-                .initialized_with(DefaultInMemoryCacheConfiguration())
-                .set_configured(False)
+            .initialized_with(DefaultInMemoryCacheConfiguration())
+            .set_configured(False)
         )
         async def get_value(arg, kwarg=None):
             raise ValueError("Get lost")
