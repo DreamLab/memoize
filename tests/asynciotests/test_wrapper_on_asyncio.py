@@ -297,7 +297,7 @@ class MemoizationTests(AsyncTestCase):
             await get_value('test1', kwarg='args1')
 
         # then
-        expected = CachedMethodFailedException('Refresh timed out')
+        expected = CachedMethodFailedException('Refresh timed out', TimeoutError('Timeout'))
         self.assertEqual(str(expected), str(context.exception))  # ToDo: consider better comparision
 
     @staticmethod
