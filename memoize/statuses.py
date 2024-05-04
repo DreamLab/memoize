@@ -4,7 +4,7 @@
 import datetime
 import logging
 from asyncio import Future
-from typing import Optional, Dict, Awaitable
+from typing import Optional, Dict, Awaitable, Union
 
 from memoize import coerced
 from memoize.entry import CacheKey, CacheEntry
@@ -14,8 +14,7 @@ class UpdateStatuses:
     def __init__(self, update_lock_timeout: datetime.timedelta = datetime.timedelta(minutes=5)) -> None:
         self.logger = logging.getLogger(__name__)
         self._update_lock_timeout = update_lock_timeout
-        # type declaration should not be in comment once we drop py35 support
-        self._updates_in_progress = {}  # type: Dict[CacheKey, Future]
+        self._updates_in_progress: Dict[CacheKey, Future] = {}
 
     def is_being_updated(self, key: CacheKey) -> bool:
         """Checks if update for given key is in progress. Obtained info is valid until control gets back to IO-loop."""
@@ -49,17 +48,19 @@ class UpdateStatuses:
         update = self._updates_in_progress.pop(key)
         update.set_result(entry)
 
-    def mark_update_aborted(self, key: CacheKey) -> None:
+    def mark_update_aborted(self, key: CacheKey, exception: Exception) -> None:
         """Informs that update failed to complete.
-        Calls to 'is_being_updated' will return False until 'mark_being_updated' will be called."""
+        Calls to 'is_being_updated' will return False until 'mark_being_updated' will be called.
+        Accepts exception to propagate it across all clients awaiting an update."""
         if key not in self._updates_in_progress:
             raise ValueError('Key {} is not being updated'.format(key))
         update = self._updates_in_progress.pop(key)
-        update.set_result(None)
+        update.set_result(exception)
 
-    def await_updated(self, key: CacheKey) -> Awaitable[Optional[CacheEntry]]:
+    def await_updated(self, key: CacheKey) -> Awaitable[Union[CacheEntry, Exception]]:
         """Waits (asynchronously) until update in progress has benn finished.
-        Returns updated entry or None if update failed/timed-out.
+        Returns awaitable with the updated entry
+        (or awaitable with an exception if update failed/timed-out).
         Should be called only if 'is_being_updated' returned True (and since then IO-loop has not been lost)."""
         if not self.is_being_updated(key):
             raise ValueError('Key {} is not being updated'.format(key))
