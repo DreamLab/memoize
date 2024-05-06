@@ -192,6 +192,10 @@ With *memoize* you have under control:
   least-recently-updated strategy is already provided;
 * entry builder (see :class:`memoize.entrybuilder.CacheEntryBuilder`)
   which has control over ``update_after``  & ``expires_after`` described in `Tunable eviction & async refreshing`_
+* value post-processing (see :class:`memoize.postprocessing.Postprocessing`);
+  noop is the default one;
+  deep-copy post-processing is also provided (be wary of deep-copy cost & limitations,
+  but deep-copying allows callers to safely modify values retrieved from an in-memory cache).
 
 All of these elements are open for extension (you can implement and plug-in your own).
 Please contribute!
@@ -209,19 +213,21 @@ Example how to customize default config (everything gets overridden):
     from memoize.entrybuilder import ProvidedLifeSpanCacheEntryBuilder
     from memoize.eviction import LeastRecentlyUpdatedEvictionStrategy
     from memoize.key import EncodedMethodNameAndArgsKeyExtractor
+    from memoize.postprocessing import DeepcopyPostprocessing
     from memoize.storage import LocalInMemoryCacheStorage
     from memoize.wrapper import memoize
 
-
-    @memoize(configuration=MutableCacheConfiguration
-             .initialized_with(DefaultInMemoryCacheConfiguration())
-             .set_method_timeout(value=timedelta(minutes=2))
-             .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(minutes=2),
-                                                                  expire_after=timedelta(minutes=5)))
-             .set_eviction_strategy(LeastRecentlyUpdatedEvictionStrategy(capacity=2048))
-             .set_key_extractor(EncodedMethodNameAndArgsKeyExtractor(skip_first_arg_as_self=False))
-             .set_storage(LocalInMemoryCacheStorage())
-             )
+    @memoize(
+        configuration=MutableCacheConfiguration
+        .initialized_with(DefaultInMemoryCacheConfiguration())
+        .set_method_timeout(value=timedelta(minutes=2))
+        .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(minutes=2),
+                                                             expire_after=timedelta(minutes=5)))
+        .set_eviction_strategy(LeastRecentlyUpdatedEvictionStrategy(capacity=2048))
+        .set_key_extractor(EncodedMethodNameAndArgsKeyExtractor(skip_first_arg_as_self=False))
+        .set_storage(LocalInMemoryCacheStorage())
+        .set_postprocessing(DeepcopyPostprocessing())
+    )
     async def cached():
         return 'dummy'
 
@@ -232,7 +238,8 @@ Still, you can use default configuration which:
 * uses in-memory storage;
 * uses method instance & arguments to infer cache key;
 * stores up to 4096 elements in cache and evicts entries according to least recently updated policy;
-* refreshes elements after 10 minutes & ignores unrefreshed elements after 30 minutes.
+* refreshes elements after 10 minutes & ignores unrefreshed elements after 30 minutes;
+* does not post-process cached values.
 
 If that satisfies you, just use default config:
 

@@ -1,3 +1,11 @@
+2.1.0
+-----
+
+* Added configurable postprocessing, that allows to modify value retrieved from the cache
+  * Added built-in implementation, that applies deep-copy
+* Fixed missing invalidation module in api docs
+* Fixed MANIFEST.in
+
 2.0.0
 -----
 
