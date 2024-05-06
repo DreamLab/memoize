@@ -1,3 +1,5 @@
+import pytest
+
 from tests.py310workaround import fix_python_3_10_compatibility
 
 fix_python_3_10_compatibility()
@@ -9,15 +11,14 @@ from datetime import datetime, timezone
 from pickle import HIGHEST_PROTOCOL, DEFAULT_PROTOCOL
 from unittest.mock import Mock
 
-from tornado.testing import AsyncTestCase, gen_test
-
 from memoize.entry import CacheEntry
 from memoize.serde import PickleSerDe, EncodingSerDe, JsonSerDe
 
 
-class EncodingSerDeTests(AsyncTestCase):
-    @gen_test
-    def test_should_apply_encoding_on_wrapped_serde_results(self):
+@pytest.mark.asyncio(scope="class")
+class TestEncodingSerDe:
+
+    async def test_should_apply_encoding_on_wrapped_serde_results(self):
         # given
         cache_entry = CacheEntry(datetime.now(), datetime.now(), datetime.now(), "value")
         serde = Mock()
@@ -29,11 +30,10 @@ class EncodingSerDeTests(AsyncTestCase):
 
         # then
         expected = codecs.encode(b"in", 'base64')
-        self.assertEqual(bytes, expected)
+        assert bytes == expected
         serde.serialize.assert_called_once_with(cache_entry)
 
-    @gen_test
-    def test_should_apply_decoding_on_wrapped_serde_results(self):
+    async def test_should_apply_decoding_on_wrapped_serde_results(self):
         # given
         cache_entry = CacheEntry(datetime.now(), datetime.now(), datetime.now(), "value")
         encoded_cache_entry = codecs.encode(b'y', 'base64')
@@ -45,11 +45,10 @@ class EncodingSerDeTests(AsyncTestCase):
         data = wrapper.deserialize(encoded_cache_entry)
 
         # then
-        self.assertEqual(data, cache_entry)
+        assert data == cache_entry
         serde.deserialize.assert_called_once_with(b'y')
 
-    @gen_test
-    def test_e2e_integration_with_sample_serde(self):
+    async def test_e2e_integration_with_sample_serde(self):
         # given
         cache_entry = CacheEntry(datetime.now(), datetime.now(), datetime.now(), "value")
         serde = PickleSerDe(pickle_protocol=HIGHEST_PROTOCOL)  # sample serde
@@ -60,12 +59,12 @@ class EncodingSerDeTests(AsyncTestCase):
         data = wrapper.deserialize(encoded_cache_entry)
 
         # then
-        self.assertEqual(data, cache_entry)
+        assert data == cache_entry
 
 
-class JsonSerDeTests(AsyncTestCase):
-    @gen_test
-    def test_should_encode_as_readable_json(self):
+class JsonSerDeTests:
+
+    async def test_should_encode_as_readable_json(self):
         # given
         cache_entry = CacheEntry(datetime.fromtimestamp(1, timezone.utc), datetime.fromtimestamp(2, timezone.utc),
                                  datetime.fromtimestamp(3, timezone.utc), "in")
@@ -76,13 +75,12 @@ class JsonSerDeTests(AsyncTestCase):
 
         # then
         parsed = json.loads(codecs.decode(bytes))  # verified this way due to json/ujson slight separator differences
-        self.assertEqual(parsed, {"created": cache_entry.created.timestamp(),
-                                  "update_after": cache_entry.update_after.timestamp(),
-                                  "expires_after": cache_entry.expires_after.timestamp(),
-                                  "value": "in"})
+        assert parsed == {"created": cache_entry.created.timestamp(),
+                          "update_after": cache_entry.update_after.timestamp(),
+                          "expires_after": cache_entry.expires_after.timestamp(),
+                          "value": "in"}
 
-    @gen_test
-    def test_should_decode_readable_json(self):
+    async def test_should_decode_readable_json(self):
         # given
         serde = JsonSerDe(string_encoding='utf-8')
 
@@ -92,10 +90,9 @@ class JsonSerDeTests(AsyncTestCase):
         # then
         cache_entry = CacheEntry(datetime.fromtimestamp(1, timezone.utc), datetime.fromtimestamp(2, timezone.utc),
                                  datetime.fromtimestamp(3, timezone.utc), "value")
-        self.assertEqual(bytes, cache_entry)
+        assert bytes == cache_entry
 
-    @gen_test
-    def test_should_apply_value_transformations_on_serialization(self):
+    async def test_should_apply_value_transformations_on_serialization(self):
         # given
         cache_entry = CacheEntry(datetime.fromtimestamp(1, timezone.utc), datetime.fromtimestamp(2, timezone.utc),
                                  datetime.fromtimestamp(3, timezone.utc), "in")
@@ -108,14 +105,13 @@ class JsonSerDeTests(AsyncTestCase):
 
         # then
         parsed = json.loads(codecs.decode(bytes))  # verified this way due to json/ujson slight separator differences
-        self.assertEqual(parsed, {"created": cache_entry.created.timestamp(),
-                                  "update_after": cache_entry.update_after.timestamp(),
-                                  "expires_after": cache_entry.expires_after.timestamp(),
-                                  "value": "out"})
+        assert parsed == {"created": cache_entry.created.timestamp(),
+                          "update_after": cache_entry.update_after.timestamp(),
+                          "expires_after": cache_entry.expires_after.timestamp(),
+                          "value": "out"}
         encode.assert_called_once_with("in")
 
-    @gen_test
-    def test_should_apply_value_transformations_on_deserialization(self):
+    async def test_should_apply_value_transformations_on_deserialization(self):
         # given
         encode = Mock(return_value="in")
         decode = Mock(return_value="out")
@@ -127,13 +123,13 @@ class JsonSerDeTests(AsyncTestCase):
         # then
         cache_entry = CacheEntry(datetime.fromtimestamp(1, timezone.utc), datetime.fromtimestamp(2, timezone.utc),
                                  datetime.fromtimestamp(3, timezone.utc), "out")
-        self.assertEqual(data, cache_entry)
+        assert data == cache_entry
         decode.assert_called_once_with("in")
 
 
-class PickleSerDeTests(AsyncTestCase):
-    @gen_test
-    def test_should_pickle_using_highest_protocol(self):
+class PickleSerDeTests:
+
+    async def test_should_pickle_using_highest_protocol(self):
         # given
         cache_entry = CacheEntry(datetime.now(), datetime.now(), datetime.now(), "value")
         serde = PickleSerDe(pickle_protocol=HIGHEST_PROTOCOL)
@@ -143,10 +139,9 @@ class PickleSerDeTests(AsyncTestCase):
 
         # then
         expected = pickle.dumps(cache_entry, protocol=HIGHEST_PROTOCOL)
-        self.assertEqual(bytes, expected)
+        assert bytes == expected
 
-    @gen_test
-    def test_should_unpickle_using_highest_protocol(self):
+    async def test_should_unpickle_using_highest_protocol(self):
         # given
         cache_entry = CacheEntry(datetime.now(), datetime.now(), datetime.now(), "value")
         serde = PickleSerDe(pickle_protocol=HIGHEST_PROTOCOL)
@@ -156,10 +151,9 @@ class PickleSerDeTests(AsyncTestCase):
         data = serde.deserialize(bytes)
 
         # then
-        self.assertEqual(data, cache_entry)
+        assert data == cache_entry
 
-    @gen_test
-    def test_should_pickle_using_default_protocol(self):
+    async def test_should_pickle_using_default_protocol(self):
         # given
         cache_entry = CacheEntry(datetime.now(), datetime.now(), datetime.now(), "value")
         serde = PickleSerDe(pickle_protocol=DEFAULT_PROTOCOL)
@@ -169,10 +163,9 @@ class PickleSerDeTests(AsyncTestCase):
 
         # then
         expected = pickle.dumps(cache_entry, protocol=DEFAULT_PROTOCOL)
-        self.assertEqual(bytes, expected)
+        assert bytes == expected
 
-    @gen_test
-    def test_should_unpickle_using_default_protocol(self):
+    async def test_should_unpickle_using_default_protocol(self):
         # given
         cache_entry = CacheEntry(datetime.now(), datetime.now(), datetime.now(), "value")
         serde = PickleSerDe(pickle_protocol=DEFAULT_PROTOCOL)
@@ -182,4 +175,4 @@ class PickleSerDeTests(AsyncTestCase):
         data = serde.deserialize(bytes)
 
         # then
-        self.assertEqual(data, cache_entry)
+        assert data == cache_entry

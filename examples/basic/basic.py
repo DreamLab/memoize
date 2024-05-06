@@ -1,10 +1,6 @@
-from memoize import memoize_configuration
-
-# needed if one has tornado installed (could be removed otherwise)
-memoize_configuration.force_asyncio = True
-
 import asyncio
 import random
+
 from memoize.wrapper import memoize
 
 

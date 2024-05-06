@@ -1,8 +1,3 @@
-from memoize import memoize_configuration
-
-# needed if one has tornado installed (could be removed otherwise)
-memoize_configuration.force_asyncio = True
-
 import asyncio
 from datetime import timedelta
 
@@ -53,6 +48,7 @@ async def main():
     # Memoize generated 17 unique backend calls
     # Other cache generated 85 unique backend calls
     # Predicted (according to TTL) 17 unique backend calls
+
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())

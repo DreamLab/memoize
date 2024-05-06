@@ -6,9 +6,9 @@ import asyncio
 import datetime
 import functools
 import logging
+from asyncio import Future
 from typing import Optional, Callable
 
-from memoize.coerced import _apply_timeout, _call_soon, _timeout_error_type
 from memoize.configuration import CacheConfiguration, NotConfiguredCacheCalledException, \
     DefaultInMemoryCacheConfiguration, MutableCacheConfiguration
 from memoize.entry import CacheKey, CacheEntry
@@ -98,10 +98,13 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
                 eviction_strategy.mark_written(key, offered_entry)
                 to_release = eviction_strategy.next_to_release()
                 if to_release is not None:
-                    _call_soon(try_release, to_release, configuration_snapshot)
+                    asyncio.get_event_loop().call_soon(
+                        asyncio.ensure_future,
+                        try_release(to_release, configuration_snapshot)
+                    )
 
                 return offered_entry
-            except (asyncio.TimeoutError, _timeout_error_type()) as e:
+            except asyncio.TimeoutError as e:
                 logger.debug('Timeout for %s: %s', key, e)
                 update_statuses.mark_update_aborted(key, e)
                 raise CachedMethodFailedException('Refresh timed out') from e
@@ -120,14 +123,18 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
         force_refresh = kwargs.pop('force_refresh_memoized', False)
         key = configuration_snapshot.key_extractor().format_key(method, args, kwargs)
 
-        current_entry = await configuration_snapshot.storage().get(key)  # type: Optional[CacheEntry]
+        current_entry: Optional[CacheEntry] = await configuration_snapshot.storage().get(key)
         if current_entry is not None:
             configuration_snapshot.eviction_strategy().mark_read(key)
 
         now = datetime.datetime.now(datetime.timezone.utc)
 
-        def value_future_provider():
-            return _apply_timeout(configuration_snapshot.method_timeout(), method(*args, **kwargs))
+        def value_future_provider() -> Future:
+            # applying timeout to the method call
+            return asyncio.ensure_future(asyncio.wait_for(
+                method(*args, **kwargs),
+                configuration_snapshot.method_timeout().total_seconds()
+            ))
 
         if current_entry is None:
             logger.debug('Creating (blocking) entry for key %s', key)
@@ -140,7 +147,10 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
             result = await refresh(None, key, value_future_provider, configuration_snapshot)
         elif current_entry.update_after <= now:
             logger.debug('Entry update point expired - entry update (async - current entry returned) for key %s', key)
-            _call_soon(refresh, current_entry, key, value_future_provider, configuration_snapshot)
+            asyncio.get_event_loop().call_soon(
+                asyncio.ensure_future,
+                refresh(current_entry, key, value_future_provider, configuration_snapshot)
+            )
             result = current_entry
         else:
             result = current_entry

@@ -1,3 +1,8 @@
+3.0.0
+-----
+
+* Removed support for Tornado
+
 2.1.0
 -----
 

@@ -1,17 +1,13 @@
-# needed if one has tornado installed (could be removed otherwise)
-from memoize import memoize_configuration
-memoize_configuration.force_asyncio = True
-
-import datetime
 import asyncio
+import datetime
 import random
 from dataclasses import dataclass
 
-from memoize.wrapper import memoize
 from memoize.configuration import DefaultInMemoryCacheConfiguration, MutableCacheConfiguration
 from memoize.entry import CacheKey, CacheEntry
 from memoize.entrybuilder import CacheEntryBuilder
 from memoize.storage import LocalInMemoryCacheStorage
+from memoize.wrapper import memoize
 
 
 @dataclass

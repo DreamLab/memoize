@@ -1,12 +1,12 @@
 """
 [Internal use only] Encapsulates update state management.
 """
+import asyncio
 import datetime
 import logging
 from asyncio import Future
-from typing import Optional, Dict, Awaitable, Union
+from typing import Dict, Awaitable, Union
 
-from memoize import coerced
 from memoize.entry import CacheKey, CacheEntry
 
 
@@ -27,7 +27,7 @@ class UpdateStatuses:
         if key in self._updates_in_progress:
             raise ValueError('Key {} is already being updated'.format(key))
 
-        future = coerced._future()
+        future: Future = asyncio.Future()
         self._updates_in_progress[key] = future
 
         def complete_on_timeout_passed():
@@ -38,7 +38,8 @@ class UpdateStatuses:
                 self._updates_in_progress[key].set_result(None)
                 self._updates_in_progress.pop(key)
 
-        coerced._call_later(self._update_lock_timeout, complete_on_timeout_passed)
+        asyncio.get_event_loop().call_later(delay=self._update_lock_timeout.total_seconds(),
+                                            callback=complete_on_timeout_passed)
 
     def mark_updated(self, key: CacheKey, entry: CacheEntry) -> None:
         """Informs that update has been finished.

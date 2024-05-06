@@ -1,12 +1,7 @@
-from tests.py310workaround import fix_python_3_10_compatibility
-
-fix_python_3_10_compatibility()
-
 import time
 from datetime import timedelta
 
-import tornado
-from tornado.testing import AsyncTestCase, gen_test
+import pytest
 
 from memoize.configuration import DefaultInMemoryCacheConfiguration
 from memoize.exceptions import CachedMethodFailedException
@@ -14,14 +9,8 @@ from memoize.wrapper import memoize
 from tests import _ensure_asyncio_background_tasks_finished
 
 
-class MemoizationTests(AsyncTestCase):
-
-    def get_new_ioloop(self):
-        return tornado.platform.asyncio.AsyncIOMainLoop()
-
-    def setUp(self):
-        self.maxDiff = None
-        super().setUp()
+@pytest.mark.asyncio(scope="class")
+class TestShowcase:
 
     # overriding this as background refreshes that failed
     # with default _handle_exception implementation cause test-case failure despite assertions passing
@@ -29,7 +18,6 @@ class MemoizationTests(AsyncTestCase):
         import logging
         logging.warning("Loose exception - see it is related to background refreshes that failed %s", value)
 
-    @gen_test
     async def test_complex_showcase(self):
         # given
         UPDATE_MS = 400.0
@@ -84,15 +72,15 @@ class MemoizationTests(AsyncTestCase):
         time.sleep(EXPIRE_S)
         await _ensure_asyncio_background_tasks_finished()
         value, should_throw = 'throws #4', True
-        with self.assertRaises(Exception) as context:
+        with pytest.raises(Exception) as context:
             await get_value_or_throw('test', kwarg='args')
 
         # then
-        self.assertEqual('ok #1', res1)
-        self.assertEqual('ok #1', res2)  # previous value - refresh in background
-        self.assertEqual('ok #2', res3)  # value from cache - still relevant
-        self.assertEqual('ok #2', res4)  # value from cache - still relevant
-        self.assertEqual('ok #2', res5)  # stale from cache - refresh in background
-        self.assertEqual('ok #2', res6)  # stale from cache - should be updated but method throws
-        self.assertEqual(str(context.exception), str(CachedMethodFailedException('Refresh failed to complete')))
-        self.assertEqual(str(context.exception.__cause__), str(ValueError("throws #4")))
+        assert 'ok #1' == res1
+        assert 'ok #1' == res2  # previous value - refresh in background
+        assert 'ok #2' == res3  # value from cache - still relevant
+        assert 'ok #2' == res4  # value from cache - still relevant
+        assert 'ok #2' == res5  # stale from cache - refresh in background
+        assert 'ok #2' == res6  # stale from cache - should be updated but method throws
+        assert str(context.value) == str(CachedMethodFailedException('Refresh failed to complete'))
+        assert str(context.value.__cause__) == str(ValueError("throws #4"))

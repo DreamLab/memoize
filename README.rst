@@ -18,7 +18,7 @@ Extended docs (including API docs) available at `memoize.readthedocs.io <https:/
 What & Why
 ==========
 
-**What:** Caching library for asynchronous Python applications.
+**What:** Caching library for asyncio Python applications.
 
 **Why:** Python deserves library that works in async world
 (for instance handles `dog-piling <https://en.wikipedia.org/wiki/Cache_stampede>`_ )
@@ -55,12 +55,6 @@ To get you up & running all you need is to install:
 Installation of Extras
 ~~~~~~~~~~~~~~~~~~~~~~
 
-If you are going to use ``memoize`` with tornado add a dependency on extra:
-
-.. code-block:: bash
-
-   pip install py-memoize[tornado]
-
 To harness the power of `ujson <https://pypi.org/project/ujson/>`_ (if JSON SerDe is used) install extra:
 
 .. code-block:: bash
@@ -73,19 +67,13 @@ Usage
 Provided examples use default configuration to cache results in memory.
 For configuration options see `Configurability`_.
 
-You can use ``memoize`` with both `asyncio <https://docs.python.org/3/library/asyncio.html>`_
-and `Tornado <https://github.com/tornadoweb/tornado>`_ -  please see the appropriate example:
-
-.. warning::
-    Support for `Tornado <https://github.com/tornadoweb/tornado>`_ is planned to be removed in the future.
-
 asyncio
 ~~~~~~~
 
 To apply default caching configuration use:
 
 ..
-    _example_source: examples/basic/basic_asyncio.py
+    _example_source: examples/basic/basic.py
 
 .. code-block:: python
 
@@ -109,45 +97,6 @@ To apply default caching configuration use:
         asyncio.get_event_loop().run_until_complete(main())
 
 
-Tornado
-~~~~~~~
-
-If your project is based on Tornado use:
-
-..
-    _example_source: examples/basic/basic_tornado.py
-
-.. code-block:: python
-
-    import random
-
-    from tornado import gen
-    from tornado.ioloop import IOLoop
-
-    from memoize.wrapper import memoize
-
-
-    @memoize()
-    @gen.coroutine
-    def expensive_computation():
-        return 'expensive-computation-' + str(random.randint(1, 100))
-
-
-    @gen.coroutine
-    def main():
-        result1 = yield expensive_computation()
-        print(result1)
-        result2 = yield expensive_computation()
-        print(result2)
-        result3 = yield expensive_computation()
-        print(result3)
-
-
-    if __name__ == "__main__":
-        IOLoop.current().run_sync(main)
-
-
-
 Features
 ========
 
@@ -160,21 +109,6 @@ like `dog-piling <https://en.wikipedia.org/wiki/Cache_stampede>`_.
 
 This library is built async-oriented from the ground-up, what manifests in, for example,
 in `Dog-piling proofness`_ or `Async cache storage`_.
-
-
-Tornado & asyncio support
--------------------------
-
-No matter what are you using, build-in `asyncio <https://docs.python.org/3/library/asyncio.html>`_
-or its predecessor `Tornado <https://github.com/tornadoweb/tornado>`_
-*memoize* has you covered as you can use it with both.
-**This may come handy if you are planning a migration from Tornado to asyncio.**
-
-Under the hood *memoize* detects if you are using *Tornado* or *asyncio*
-(by checking if *Tornado* is installed and available to import).
-
-If have *Tornado* installed but your application uses *asyncio* IO-loop,
-set ``MEMOIZE_FORCE_ASYNCIO=1`` environment variable to force using *asyncio* and ignore *Tornado* instalation.
 
 
 Configurability
@@ -310,7 +244,7 @@ On failure, all requesters get an exception (same happens on timeout).
 An example of what it all is about:
 
 ..
-    _example_source: examples/dogpiling/dogpiling_asyncio.py
+    _example_source: examples/dogpiling/dogpiling.py
 
 .. code-block:: python
 

@@ -1,10 +1,5 @@
-# needed if one has tornado installed (could be removed otherwise)
-from memoize import memoize_configuration
-memoize_configuration.force_asyncio = True
-
 from memoize.configuration import DefaultInMemoryCacheConfiguration
 from memoize.invalidation import InvalidationSupport
-
 
 import asyncio
 import random
@@ -42,6 +37,7 @@ async def main():
     # expensive - computation - 73
     # Invalidation  # 2
     # expensive - computation - 59
+
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())
