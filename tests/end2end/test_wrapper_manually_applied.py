@@ -11,7 +11,7 @@ from memoize.eviction import LeastRecentlyUpdatedEvictionStrategy
 from memoize.exceptions import CachedMethodFailedException
 from memoize.storage import LocalInMemoryCacheStorage
 from memoize.wrapper import memoize
-from tests import _ensure_asyncio_background_tasks_finished
+from tests import _ensure_background_tasks_finished
 
 
 @pytest.mark.asyncio(scope="class")
@@ -32,7 +32,7 @@ class TestWrapperManuallyApplied:
         # when
         res1 = await get_value_cached('test', kwarg='args')
         await asyncio.sleep(0.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         # calling thrice be more confident about behaviour of parallel execution
         res2 = await self._call_thrice(lambda: get_value_cached('test', kwarg='args'))
@@ -56,7 +56,7 @@ class TestWrapperManuallyApplied:
         # when
         res1 = await get_value_cached('test', kwarg='args')
         await asyncio.sleep(0.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         # calling thrice be more confident about behaviour of parallel execution
         res2 = await self._call_thrice(lambda: get_value_cached('test', kwarg='args'))
@@ -80,7 +80,7 @@ class TestWrapperManuallyApplied:
         # when
         res1 = await get_value_cached('test', kwarg='args')
         await asyncio.sleep(0.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         # calling thrice be more confident about behaviour of parallel execution
         res2 = await self._call_thrice(lambda: get_value_cached('test', kwarg='args'))
@@ -104,10 +104,10 @@ class TestWrapperManuallyApplied:
         # when
         res1 = await get_value_cached('test', kwarg='args')
         await asyncio.sleep(0.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         await get_value_cached('test', kwarg='args')
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         # calling thrice be more confident about behaviour of parallel execution
         res2 = await self._call_thrice(lambda: get_value_cached('test', kwarg='args'))
 
@@ -127,7 +127,7 @@ class TestWrapperManuallyApplied:
         # when
         res1 = await get_value_cached('test1', kwarg='args')
         await asyncio.sleep(0.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         res2 = await get_value_cached('test2', kwarg='args')
 
@@ -147,7 +147,7 @@ class TestWrapperManuallyApplied:
         # when
         res1 = await get_value_cached('test', kwarg='args1')
         await asyncio.sleep(0.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         res2 = await get_value_cached('test', kwarg='args2')
 
@@ -174,7 +174,7 @@ class TestWrapperManuallyApplied:
         # when
         res1 = await get_value_cached('test1', kwarg='args1')
         await asyncio.sleep(0.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         res2 = await get_value_cached('test2', kwarg='args2')
 
@@ -206,7 +206,7 @@ class TestWrapperManuallyApplied:
         await get_value_cached('test2', kwarg='args2')
         await get_value_cached('test3', kwarg='args3')
         await get_value_cached('test4', kwarg='args4')
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
 
         # then
         s1 = await storage.get("('test1', 'args1')")
@@ -257,9 +257,9 @@ class TestWrapperManuallyApplied:
     async def test_should_throw_exception_on_refresh_timeout(self):
         # given
         async def get_value(arg, kwarg=None):
-            await _ensure_asyncio_background_tasks_finished()
+            await _ensure_background_tasks_finished()
             time.sleep(.200)
-            await _ensure_asyncio_background_tasks_finished()
+            await _ensure_background_tasks_finished()
             return 0
 
         get_value_cached = memoize(

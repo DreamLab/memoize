@@ -8,7 +8,7 @@ import pytest
 from memoize.configuration import MutableCacheConfiguration, DefaultInMemoryCacheConfiguration
 from memoize.entrybuilder import ProvidedLifeSpanCacheEntryBuilder
 from memoize.wrapper import memoize
-from tests import _assert_called_once_with, AnyObject, _as_future, _ensure_asyncio_background_tasks_finished, \
+from tests import _assert_called_once_with, AnyObject, _as_future, _ensure_background_tasks_finished, \
     _ensure_background_tasks_finished
 
 
@@ -167,14 +167,14 @@ class TestEvictionStrategyInteractions:
             return arg, kwarg
 
         await sample_method('test', kwarg='args')
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         time.sleep(.200)
         eviction_strategy.next_to_release.reset_mock()
         storage.release.reset_mock()
 
         # when
         await sample_method('test', kwarg='args')
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
 
         # then
         eviction_strategy.next_to_release.assert_called_once_with()

@@ -11,7 +11,7 @@ from memoize.eviction import LeastRecentlyUpdatedEvictionStrategy
 from memoize.exceptions import CachedMethodFailedException
 from memoize.storage import LocalInMemoryCacheStorage
 from memoize.wrapper import memoize
-from tests import _ensure_asyncio_background_tasks_finished
+from tests import _ensure_background_tasks_finished
 
 
 @pytest.mark.asyncio(scope="class")
@@ -33,7 +33,7 @@ class TestWrapper:
         # when
         res1 = await get_value('test', kwarg='args')
         time.sleep(.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         # calling thrice be more confident about behaviour of parallel execution
         res2 = await self._call_thrice(lambda: get_value('test', kwarg='args'))
@@ -54,7 +54,7 @@ class TestWrapper:
         # when
         res1 = await get_value('test', kwarg='args')
         time.sleep(.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         # calling thrice be more confident about behaviour of parallel execution
         res2 = await self._call_thrice(lambda: get_value('test', kwarg='args'))
@@ -75,7 +75,7 @@ class TestWrapper:
         # when
         res1 = await get_value('test', kwarg='args')
         time.sleep(.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         # calling thrice be more confident about behaviour of parallel execution
         res2 = await self._call_thrice(lambda: get_value('test', kwarg='args'))
@@ -96,10 +96,10 @@ class TestWrapper:
         # when
         res1 = await get_value('test', kwarg='args')
         time.sleep(.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         await get_value('test', kwarg='args')
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         # calling thrice be more confident about behaviour of parallel execution
         res2 = await self._call_thrice(lambda: get_value('test', kwarg='args'))
 
@@ -118,7 +118,7 @@ class TestWrapper:
         # when
         res1 = await get_value('test1', kwarg='args')
         time.sleep(.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         res2 = await get_value('test2', kwarg='args')
 
@@ -137,7 +137,7 @@ class TestWrapper:
         # when
         res1 = await get_value('test', kwarg='args1')
         time.sleep(.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         res2 = await get_value('test', kwarg='args2')
 
@@ -180,9 +180,9 @@ class TestWrapper:
 
         @memoize(configuration=DefaultInMemoryCacheConfiguration(method_timeout=timedelta(milliseconds=1)))
         async def get_value(arg, kwarg=None):
-            await _ensure_asyncio_background_tasks_finished()
+            await _ensure_background_tasks_finished()
             time.sleep(.200)
-            await _ensure_asyncio_background_tasks_finished()
+            await _ensure_background_tasks_finished()
             return value
 
         # when
@@ -223,7 +223,7 @@ class TestWrapper:
         # when
         res1 = await get_value('test1', kwarg='args1')
         time.sleep(.200)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value = 1
         res2 = await get_value('test2', kwarg='args2')
 
@@ -253,7 +253,7 @@ class TestWrapper:
         await get_value('test2', kwarg='args2')
         await get_value('test3', kwarg='args3')
         await get_value('test4', kwarg='args4')
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
 
         # then
         s1 = await storage.get("('test1', 'args1')")
@@ -303,9 +303,9 @@ class TestWrapper:
 
         @memoize(configuration=DefaultInMemoryCacheConfiguration(method_timeout=timedelta(milliseconds=100)))
         async def get_value(arg, kwarg=None):
-            await _ensure_asyncio_background_tasks_finished()
+            await _ensure_background_tasks_finished()
             time.sleep(.200)
-            await _ensure_asyncio_background_tasks_finished()
+            await _ensure_background_tasks_finished()
             return 0
 
         # when

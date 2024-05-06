@@ -6,7 +6,7 @@ import pytest
 from memoize.configuration import DefaultInMemoryCacheConfiguration
 from memoize.exceptions import CachedMethodFailedException
 from memoize.wrapper import memoize
-from tests import _ensure_asyncio_background_tasks_finished
+from tests import _ensure_background_tasks_finished
 
 
 @pytest.mark.asyncio(scope="class")
@@ -40,37 +40,37 @@ class TestShowcase:
 
         # when #2: background refresh - returns stale
         time.sleep(UPDATE_S)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value, should_throw = 'ok #2', False
         res2 = await get_value_or_throw('test', kwarg='args')
 
         # when #3: no refresh (cache up-to-date)
         time.sleep(.10)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value, should_throw = 'ok #3', False
         res3 = await get_value_or_throw('test', kwarg='args')
 
         # when #4: no refresh (cache up-to-date) but starts throwing
         time.sleep(.10)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value, should_throw = 'throws #1', True
         res4 = await get_value_or_throw('test', kwarg='args')
 
         # when #5: background refresh while throwing - returns stale
         time.sleep(UPDATE_S)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value, should_throw = 'throws #2', True
         res5 = await get_value_or_throw('test', kwarg='args')
 
         # when #6: stale value from cache as method raised during background refresh at #5
         time.sleep(.10)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value, should_throw = 'throws #3', True
         res6 = await get_value_or_throw('test', kwarg='args')
 
         # when #7: stale expired - cache throws synchronously
         time.sleep(EXPIRE_S)
-        await _ensure_asyncio_background_tasks_finished()
+        await _ensure_background_tasks_finished()
         value, should_throw = 'throws #4', True
         with pytest.raises(Exception) as context:
             await get_value_or_throw('test', kwarg='args')
