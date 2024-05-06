@@ -1,3 +1,10 @@
+2.1.0
+-----
+
+* Added configurable postprocessing, that allows to modify value retrieved from the cache
+  * Added built-in implementation, that applies deep-copy
+* Fix MANIFEST.in
+
 2.0.0
 -----
 

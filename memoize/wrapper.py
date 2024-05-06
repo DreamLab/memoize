@@ -145,6 +145,6 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
         else:
             result = current_entry
 
-        return result.value
+        return configuration_snapshot.postprocessing().apply(result.value)
 
     return wrapper
