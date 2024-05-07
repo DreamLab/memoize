@@ -4,14 +4,6 @@ memoize package
 Submodules
 ----------
 
-memoize.coerced module
-----------------------
-
-.. automodule:: memoize.coerced
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 memoize.configuration module
 ----------------------------
 
@@ -64,14 +56,6 @@ memoize.key module
 ------------------
 
 .. automodule:: memoize.key
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-memoize.memoize\_configuration module
--------------------------------------
-
-.. automodule:: memoize.memoize_configuration
    :members:
    :undoc-members:
    :show-inheritance:

@@ -11,7 +11,7 @@ def prepare_description():
 
 setup(
     name='py-memoize',
-    version='2.1.0',
+    version='3.0.0',
     author='Michal Zmuda',
     author_email='zmu.michal@gmail.com',
     url='https://github.com/DreamLab/memoize',
@@ -27,7 +27,6 @@ setup(
     keywords='python cache tornado asyncio',
     install_requires=None,
     extras_require={
-        'tornado': ['tornado>4,<5'],
         'ujson': ['ujson>=1.35,<2'],
     },
     classifiers=[
