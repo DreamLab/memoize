@@ -1,3 +1,42 @@
+2.1.0
+-----
+
+* Added configurable postprocessing, that allows to modify value retrieved from the cache
+  * Added built-in implementation, that applies deep-copy
+* Fixed missing invalidation module in api docs
+* Fixed MANIFEST.in
+
+2.0.0
+-----
+
+* Changed exception handling
+  * now exceptions are chained (before they were added in `args`)
+  * timeout errors are now chained (before they were not included at all)
+  * in case of dogpiling, all callers are now notified about the error (see issue #23)
+
+1.2.2
+-----
+
+* Fixed an example, that used deprecated `utcnow`
+
+1.2.1
+-----
+
+* Fixed UTC related deprecation warnings in Python 3.12+
+
+1.2.0
+-----
+
+* Added support for Python 3.12
+* Added warning that support for Tornado is deprecated and will be removed in future
+  (it causes more and more hacks/workarounds while Tornado importance is diminishing).
+
+1.1.5
+-----
+
+* Expanded docs adding section on how to achieve granular expire/update time control (different settings per entry).
+* Minor fix for contribution guide (after migration, Travis was still mentioned instead of GitHub Actions).
+
 1.1.4
 -----
 

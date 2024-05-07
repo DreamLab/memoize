@@ -76,6 +76,9 @@ For configuration options see `Configurability`_.
 You can use ``memoize`` with both `asyncio <https://docs.python.org/3/library/asyncio.html>`_
 and `Tornado <https://github.com/tornadoweb/tornado>`_ -  please see the appropriate example:
 
+.. warning::
+    Support for `Tornado <https://github.com/tornadoweb/tornado>`_ is planned to be removed in the future.
+
 asyncio
 ~~~~~~~
 
@@ -189,6 +192,10 @@ With *memoize* you have under control:
   least-recently-updated strategy is already provided;
 * entry builder (see :class:`memoize.entrybuilder.CacheEntryBuilder`)
   which has control over ``update_after``  & ``expires_after`` described in `Tunable eviction & async refreshing`_
+* value post-processing (see :class:`memoize.postprocessing.Postprocessing`);
+  noop is the default one;
+  deep-copy post-processing is also provided (be wary of deep-copy cost & limitations,
+  but deep-copying allows callers to safely modify values retrieved from an in-memory cache).
 
 All of these elements are open for extension (you can implement and plug-in your own).
 Please contribute!
@@ -206,19 +213,21 @@ Example how to customize default config (everything gets overridden):
     from memoize.entrybuilder import ProvidedLifeSpanCacheEntryBuilder
     from memoize.eviction import LeastRecentlyUpdatedEvictionStrategy
     from memoize.key import EncodedMethodNameAndArgsKeyExtractor
+    from memoize.postprocessing import DeepcopyPostprocessing
     from memoize.storage import LocalInMemoryCacheStorage
     from memoize.wrapper import memoize
 
-
-    @memoize(configuration=MutableCacheConfiguration
-             .initialized_with(DefaultInMemoryCacheConfiguration())
-             .set_method_timeout(value=timedelta(minutes=2))
-             .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(minutes=2),
-                                                                  expire_after=timedelta(minutes=5)))
-             .set_eviction_strategy(LeastRecentlyUpdatedEvictionStrategy(capacity=2048))
-             .set_key_extractor(EncodedMethodNameAndArgsKeyExtractor(skip_first_arg_as_self=False))
-             .set_storage(LocalInMemoryCacheStorage())
-             )
+    @memoize(
+        configuration=MutableCacheConfiguration
+        .initialized_with(DefaultInMemoryCacheConfiguration())
+        .set_method_timeout(value=timedelta(minutes=2))
+        .set_entry_builder(ProvidedLifeSpanCacheEntryBuilder(update_after=timedelta(minutes=2),
+                                                             expire_after=timedelta(minutes=5)))
+        .set_eviction_strategy(LeastRecentlyUpdatedEvictionStrategy(capacity=2048))
+        .set_key_extractor(EncodedMethodNameAndArgsKeyExtractor(skip_first_arg_as_self=False))
+        .set_storage(LocalInMemoryCacheStorage())
+        .set_postprocessing(DeepcopyPostprocessing())
+    )
     async def cached():
         return 'dummy'
 
@@ -229,7 +238,8 @@ Still, you can use default configuration which:
 * uses in-memory storage;
 * uses method instance & arguments to infer cache key;
 * stores up to 4096 elements in cache and evicts entries according to least recently updated policy;
-* refreshes elements after 10 minutes & ignores unrefreshed elements after 30 minutes.
+* refreshes elements after 10 minutes & ignores unrefreshed elements after 30 minutes;
+* does not post-process cached values.
 
 If that satisfies you, just use default config:
 
@@ -423,6 +433,81 @@ Then you could just pass args and kwargs for which you want to invalidate entry.
         # expensive - computation - 73
         # Invalidation  # 2
         # expensive - computation - 59
+
+    if __name__ == "__main__":
+        asyncio.get_event_loop().run_until_complete(main())
+
+
+Openness to granular TTL
+------------------------
+
+Default configuration sets update and expiry based on fixed values, which are the same for all entries.
+If you need to set different TTLs for different entries, you can do so by providing
+a custom :class:`memoize.entrybuilder.CacheEntryBuilder`.
+
+.. code-block:: python
+
+    import datetime
+    import asyncio
+    import random
+    from dataclasses import dataclass
+
+    from memoize.wrapper import memoize
+    from memoize.configuration import DefaultInMemoryCacheConfiguration, MutableCacheConfiguration
+    from memoize.entry import CacheKey, CacheEntry
+    from memoize.entrybuilder import CacheEntryBuilder
+    from memoize.storage import LocalInMemoryCacheStorage
+
+
+    @dataclass
+    class ValueWithTTL:
+        value: str
+        ttl_seconds: int  # for instance, it could be derived from Cache-Control response header
+
+
+    class TtlRespectingCacheEntryBuilder(CacheEntryBuilder):
+        def build(self, key: CacheKey, value: ValueWithTTL):
+            now = datetime.datetime.now(datetime.timezone.utc)
+            ttl_ends_at = now + datetime.timedelta(seconds=value.ttl_seconds)
+            return CacheEntry(
+                created=now,
+                update_after=ttl_ends_at,
+                # allowing stale data for 10% of TTL
+                expires_after=ttl_ends_at + datetime.timedelta(seconds=value.ttl_seconds // 10),
+                value=value
+            )
+
+
+    storage = LocalInMemoryCacheStorage()  # overridden & extracted for demonstration purposes only
+
+
+    @memoize(configuration=MutableCacheConfiguration
+             .initialized_with(DefaultInMemoryCacheConfiguration())
+             .set_entry_builder(TtlRespectingCacheEntryBuilder())
+             .set_storage(storage))
+    async def external_call(key: str):
+        return ValueWithTTL(
+            value=f'{key}-result-{random.randint(1, 100)}',
+            ttl_seconds=random.randint(60, 300)
+        )
+
+
+    async def main():
+        await external_call('a')
+        await external_call('b')
+        await external_call('b')
+
+        print("Entries persisted in the cache:")
+        for entry in storage._data.values():
+            print('Entry: ', entry.value)
+            print('Effective TTL: ', (entry.update_after - entry.created).total_seconds())
+
+        # Entries persisted in the cache:
+        # Entry: ValueWithTTL(value='a-result-79', ttl_seconds=148)
+        # Effective TTL: 148.0
+        # Entry: ValueWithTTL(value='b-result-27', ttl_seconds=192)
+        # Effective TTL: 192.0
+
 
     if __name__ == "__main__":
         asyncio.get_event_loop().run_until_complete(main())

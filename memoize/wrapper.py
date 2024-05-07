@@ -77,8 +77,8 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
         if actual_entry is None and update_statuses.is_being_updated(key):
             logger.debug('As entry expired, waiting for results of concurrent refresh %s', key)
             entry = await update_statuses.await_updated(key)
-            if entry is None:
-                raise CachedMethodFailedException('Concurrent refresh failed to complete')
+            if isinstance(entry, Exception):
+                raise CachedMethodFailedException('Concurrent refresh failed to complete') from entry
             return entry
         elif actual_entry is not None and update_statuses.is_being_updated(key):
             logger.debug('As update point reached but concurrent update already in progress, '
@@ -103,12 +103,12 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
                 return offered_entry
             except (asyncio.TimeoutError, _timeout_error_type()) as e:
                 logger.debug('Timeout for %s: %s', key, e)
-                update_statuses.mark_update_aborted(key)
-                raise CachedMethodFailedException('Refresh timed out')
+                update_statuses.mark_update_aborted(key, e)
+                raise CachedMethodFailedException('Refresh timed out') from e
             except Exception as e:
                 logger.debug('Error while refreshing cache for %s: %s', key, e)
-                update_statuses.mark_update_aborted(key)
-                raise CachedMethodFailedException('Refresh failed to complete', e)
+                update_statuses.mark_update_aborted(key, e)
+                raise CachedMethodFailedException('Refresh failed to complete') from e
 
     @functools.wraps(method)
     async def wrapper(*args, **kwargs):
@@ -124,7 +124,7 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
         if current_entry is not None:
             configuration_snapshot.eviction_strategy().mark_read(key)
 
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
 
         def value_future_provider():
             return _apply_timeout(configuration_snapshot.method_timeout(), method(*args, **kwargs))
@@ -145,6 +145,6 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
         else:
             result = current_entry
 
-        return result.value
+        return configuration_snapshot.postprocessing().apply(result.value)
 
     return wrapper

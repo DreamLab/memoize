@@ -62,14 +62,14 @@ class UpdateStatusesTests(AsyncTestCase):
     def test_should_raise_exception_during_mark_update_as_aborted(self):
         # given/when/then
         with self.assertRaises(ValueError):
-            self.update_statuses.mark_update_aborted('key')
+            self.update_statuses.mark_update_aborted('key', Exception('stub'))
 
     def test_should_mark_update_as_aborted(self):
         # given
         self.update_statuses.mark_being_updated('key')
 
         # when
-        self.update_statuses.mark_update_aborted('key')
+        self.update_statuses.mark_update_aborted('key', Exception('stub'))
 
         # then
         self.assertFalse(self.update_statuses.is_being_updated('key'))
@@ -105,3 +105,23 @@ class UpdateStatusesTests(AsyncTestCase):
         # then
         self.assertIsNone(result)
         self.assertFalse(self.update_statuses.is_being_updated('key'))
+
+    @gen_test
+    async def test_concurrent_callers_should_all_get_exception_on_aborted_update(self):
+        # given
+        self.update_statuses.mark_being_updated('key')
+
+        # when
+        result1 = self.update_statuses.await_updated('key')
+        result2 = self.update_statuses.await_updated('key')
+        result3 = self.update_statuses.await_updated('key')
+        self.update_statuses.mark_update_aborted('key', ValueError('stub'))
+        result1 = await result1
+        result2 = await result2
+        result3 = await result3
+
+        # then
+        self.assertFalse(self.update_statuses.is_being_updated('key'))
+        self.assertEqual(str(result1), str(ValueError('stub')))
+        self.assertEqual(str(result2), str(ValueError('stub')))
+        self.assertEqual(str(result3), str(ValueError('stub')))

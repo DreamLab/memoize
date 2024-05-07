@@ -9,6 +9,7 @@ from datetime import timedelta
 from memoize.entrybuilder import CacheEntryBuilder, ProvidedLifeSpanCacheEntryBuilder
 from memoize.eviction import EvictionStrategy, LeastRecentlyUpdatedEvictionStrategy
 from memoize.key import KeyExtractor, EncodedMethodReferenceAndArgsKeyExtractor
+from memoize.postprocessing import Postprocessing, NoPostprocessing
 from memoize.storage import CacheStorage
 from memoize.storage import LocalInMemoryCacheStorage
 
@@ -51,15 +52,24 @@ class CacheConfiguration(metaclass=ABCMeta):
         """ Determines which EvictionStrategy is to be used by cache. """
         raise NotImplementedError()
 
+    @abstractmethod
+    def postprocessing(self) -> Postprocessing:
+        """ Determines which/if Postprocessing is to be used by cache. """
+        raise NotImplementedError()
+
     def __str__(self) -> str:
         return self.__repr__()
 
     def __repr__(self) -> str:
-        return "{name}[configured={configured}, method_timeout={method_timeout}, entry_builder={entry_builder}," \
-               " key_extractor={key_extractor}, storage={storage}, eviction_strategy={eviction_strategy}]" \
-            .format(name=self.__class__, configured=self.configured(), method_timeout=self.method_timeout(),
-                    entry_builder=self.entry_builder(), key_extractor=self.key_extractor(), storage=self.storage(),
-                    eviction_strategy=self.eviction_strategy())
+        return (f"{self.__class__}["
+                f"configured={self.configured()}, "
+                f"method_timeout={self.method_timeout()}, "
+                f"entry_builder={self.entry_builder()}, "
+                f"key_extractor={self.key_extractor()}, "
+                f"storage={self.storage()}, "
+                f"eviction_strategy={self.eviction_strategy()}, "
+                f"postprocessing={self.postprocessing()}"
+                f"]")
 
 
 class MutableCacheConfiguration(CacheConfiguration):
@@ -67,7 +77,7 @@ class MutableCacheConfiguration(CacheConfiguration):
     May be also used to customize existing configuration (for example a default one, which is immutable)."""
 
     def __init__(self, configured: bool, storage: CacheStorage, key_extractor: KeyExtractor,
-                 eviction_strategy: EvictionStrategy, entry_builder: CacheEntryBuilder,
+                 eviction_strategy: EvictionStrategy, entry_builder: CacheEntryBuilder, postprocessing: Postprocessing,
                  method_timeout: timedelta) -> None:
         self.__storage = storage
         self.__configured = configured
@@ -75,6 +85,7 @@ class MutableCacheConfiguration(CacheConfiguration):
         self.__entry_builder = entry_builder
         self.__method_timeout = method_timeout
         self.__eviction_strategy = eviction_strategy
+        self.__postprocessing = postprocessing
 
     @staticmethod
     def initialized_with(configuration: CacheConfiguration) -> 'MutableCacheConfiguration':
@@ -85,6 +96,7 @@ class MutableCacheConfiguration(CacheConfiguration):
             entry_builder=configuration.entry_builder(),
             method_timeout=configuration.method_timeout(),
             eviction_strategy=configuration.eviction_strategy(),
+            postprocessing=configuration.postprocessing(),
         )
 
     def method_timeout(self) -> timedelta:
@@ -104,6 +116,9 @@ class MutableCacheConfiguration(CacheConfiguration):
 
     def eviction_strategy(self) -> EvictionStrategy:
         return self.__eviction_strategy
+
+    def postprocessing(self) -> Postprocessing:
+        return self.__postprocessing
 
     def set_method_timeout(self, value: timedelta) -> 'MutableCacheConfiguration':
         self.__method_timeout = value
@@ -129,6 +144,10 @@ class MutableCacheConfiguration(CacheConfiguration):
         self.__eviction_strategy = value
         return self
 
+    def set_postprocessing(self, value: Postprocessing) -> 'MutableCacheConfiguration':
+        self.__postprocessing = value
+        return self
+
 
 class DefaultInMemoryCacheConfiguration(CacheConfiguration):
     """ Default parameters that describe in-memory cache. Be ware that parameters used do not suit every case. """
@@ -142,6 +161,7 @@ class DefaultInMemoryCacheConfiguration(CacheConfiguration):
         self.__key_extractor = EncodedMethodReferenceAndArgsKeyExtractor()
         self.__eviction_strategy = LeastRecentlyUpdatedEvictionStrategy(capacity=capacity)
         self.__entry_builder = ProvidedLifeSpanCacheEntryBuilder(update_after=update_after, expire_after=expire_after)
+        self.__postprocessing = NoPostprocessing()
 
     def configured(self) -> bool:
         return self.__configured
@@ -160,3 +180,6 @@ class DefaultInMemoryCacheConfiguration(CacheConfiguration):
 
     def key_extractor(self) -> EncodedMethodReferenceAndArgsKeyExtractor:
         return self.__key_extractor
+
+    def postprocessing(self) -> Postprocessing:
+        return self.__postprocessing
