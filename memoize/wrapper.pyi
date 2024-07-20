@@ -7,7 +7,7 @@ FN = TypeVar('FN', bound=Callable)
 
 
 @overload
-def memoize(configuration: CacheConfiguration = None,
+def memoize(*, configuration: CacheConfiguration = None,
             invalidation: InvalidationSupport = None) -> Callable[[FN], FN]: ...
 
 
