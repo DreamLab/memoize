@@ -50,7 +50,7 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
     if method is None:
         if configuration is None:
             configuration = DefaultInMemoryCacheConfiguration()
-        return functools.partial(memoize, configuration=configuration, invalidation=invalidation)
+        return functools.partial(memoize, configuration=configuration, invalidation=invalidation, update_status_tracker=update_status_tracker)
 
     if invalidation is not None and not invalidation._initialized() and configuration is not None:
         invalidation._initialize(configuration.storage(), configuration.key_extractor(), method)
