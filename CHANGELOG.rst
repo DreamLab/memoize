@@ -1,3 +1,9 @@
+3.1.0
+-----
+
+* Added ability to configure `UpdateStatuses` (for instance to update lock duration)
+  * Split default implementation into an interface and a default implementation
+
 3.0.0
 -----
 
