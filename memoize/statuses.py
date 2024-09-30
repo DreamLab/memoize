@@ -46,7 +46,7 @@ class UpdateStatuses(metaclass=ABCMeta):
 
 
 class InMemoryLocks(UpdateStatuses):
-    """Manages in-memory locks to prevent dog-piling. """
+    """Manages in-memory locks (for each updated key) to prevent dog-piling. """
     def __init__(self, update_lock_timeout: datetime.timedelta = datetime.timedelta(minutes=5)) -> None:
         self.logger = logging.getLogger(__name__)
         self._update_lock_timeout = update_lock_timeout
