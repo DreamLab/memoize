@@ -14,31 +14,31 @@ from memoize.entry import CacheKey, CacheEntry
 class UpdateStatuses(metaclass=ABCMeta):
     @abstractmethod
     def is_being_updated(self, key: CacheKey) -> bool:
-        """Check if update for given key is in progress. Obtained info is valid until control gets back to IO-loop."""
+        """Checks if update for given key is in progress. Obtained info is valid until control gets back to IO-loop."""
         raise NotImplementedError()
 
     @abstractmethod
     def mark_being_updated(self, key: CacheKey) -> None:
-        """Inform that update has been started.
+        """Informs that update has been started.
         Should be called only if 'is_being_updated' returned False (and since then IO-loop has not been lost)..
         Calls to 'is_being_updated' will return True until 'mark_updated' will be called."""
         raise NotImplementedError()
 
     def mark_updated(self, key: CacheKey, entry: CacheEntry) -> None:
-        """Inform that update has been finished.
+        """Informs that update has been finished.
         Calls to 'is_being_updated' will return False until 'mark_being_updated' will be called."""
         raise NotImplementedError()
 
     @abstractmethod
     def mark_update_aborted(self, key: CacheKey, exception: Exception) -> None:
-        """Inform that update failed to complete.
+        """Informs that update failed to complete.
         Calls to 'is_being_updated' will return False until 'mark_being_updated' will be called.
         Accepts exception to propagate it across all clients awaiting an update."""
         raise NotImplementedError()
 
     @abstractmethod
     def await_updated(self, key: CacheKey) -> Awaitable[Union[CacheEntry, Exception]]:
-        """Wait (asynchronously) until update in progress has benn finished.
+        """Waits (asynchronously) until update in progress has benn finished.
         Returns awaitable with the updated entry
         (or awaitable with an exception if update failed/timed-out).
         Should be called only if 'is_being_updated' returned True (and since then IO-loop has not been lost)."""
