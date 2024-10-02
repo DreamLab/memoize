@@ -17,6 +17,7 @@ setup(
     url='https://github.com/DreamLab/memoize',
     maintainer='DreamLab',
     packages=['memoize'],
+    package_data={'memoize': ['py.typed']},
     test_suite='tests',
     license='Apache License 2.0',
     description=('Caching library for asynchronous Python applications (both based on asyncio and Tornado) '
