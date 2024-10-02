@@ -14,11 +14,11 @@ from memoize.configuration import CacheConfiguration, NotConfiguredCacheCalledEx
 from memoize.entry import CacheKey, CacheEntry
 from memoize.exceptions import CachedMethodFailedException
 from memoize.invalidation import InvalidationSupport
-from memoize.statuses import UpdateStatuses
+from memoize.statuses import UpdateStatuses, InMemoryLocks
 
 
 def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration = None,
-            invalidation: InvalidationSupport = None):
+            invalidation: InvalidationSupport = None, update_statuses: UpdateStatuses = None):
     """Wraps function with memoization.
 
     If entry reaches time it should be updated, refresh is performed in background,
@@ -41,6 +41,8 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
     :param function method:                         function to be decorated
     :param CacheConfiguration configuration:        cache configuration; default: DefaultInMemoryCacheConfiguration
     :param InvalidationSupport invalidation:        pass created instance of InvalidationSupport to have it configured
+    :param UpdateStatuses update_statuses:          allows to override how cache updates are tracked (e.g. lock config);
+                                                    default: InMemoryStatuses
 
     :raises: CachedMethodFailedException            upon call: if cached method timed-out or thrown an exception
     :raises: NotConfiguredCacheCalledException      upon call: if provided configuration is not ready
@@ -49,7 +51,12 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
     if method is None:
         if configuration is None:
             configuration = DefaultInMemoryCacheConfiguration()
-        return functools.partial(memoize, configuration=configuration, invalidation=invalidation)
+        return functools.partial(
+            memoize,
+            configuration=configuration,
+            invalidation=invalidation,
+            update_statuses=update_statuses
+        )
 
     if invalidation is not None and not invalidation._initialized() and configuration is not None:
         invalidation._initialize(configuration.storage(), configuration.key_extractor(), method)
@@ -57,7 +64,8 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
     logger = logging.getLogger('{}@{}'.format(memoize.__name__, method.__name__))
     logger.debug('wrapping %s with memoization - configuration: %s', method.__name__, configuration)
 
-    update_statuses = UpdateStatuses()
+    if update_statuses is None:
+        update_statuses = InMemoryLocks()
 
     async def try_release(key: CacheKey, configuration_snapshot: CacheConfiguration) -> bool:
         if update_statuses.is_being_updated(key):

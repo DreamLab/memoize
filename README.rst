@@ -160,7 +160,8 @@ Example how to customize default config (everything gets overridden):
         .set_eviction_strategy(LeastRecentlyUpdatedEvictionStrategy(capacity=2048))
         .set_key_extractor(EncodedMethodNameAndArgsKeyExtractor(skip_first_arg_as_self=False))
         .set_storage(LocalInMemoryCacheStorage())
-        .set_postprocessing(DeepcopyPostprocessing())
+        .set_postprocessing(DeepcopyPostprocessing()),
+        update_statuses=InMemoryLocks(update_lock_timeout=timedelta(minutes=5))
     )
     async def cached():
         return 'dummy'

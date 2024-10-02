@@ -6,14 +6,14 @@ fix_python_3_10_compatibility()
 
 from datetime import timedelta
 
-from memoize.statuses import UpdateStatuses
+from memoize.statuses import InMemoryLocks, UpdateStatuses
 
 
 @pytest.mark.asyncio(scope="class")
 class TestStatuses:
 
     def setup_method(self):
-        self.update_statuses = UpdateStatuses()
+        self.update_statuses: UpdateStatuses = InMemoryLocks()
 
     async def test_should_not_be_updating(self):
         # given/when/then
