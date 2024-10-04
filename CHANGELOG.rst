@@ -2,6 +2,7 @@
 -----
 
 * Since 3.8, CancelledError is a subclass of BaseException rather than Exception, so we need to catch it explicitly.
+* Enabled `mypy` for `wrapper` function.
 
 3.1.0
 -----
