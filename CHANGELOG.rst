@@ -1,3 +1,8 @@
+3.1.1
+-----
+
+* Since 3.8, CancelledError is a subclass of BaseException rather than Exception, so we need to catch it explicitly.
+
 3.1.0
 -----
 
