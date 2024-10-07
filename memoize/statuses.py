@@ -5,7 +5,7 @@ import asyncio
 import datetime
 import logging
 from abc import ABCMeta, abstractmethod
-from asyncio import Future
+from asyncio import Future, CancelledError
 from typing import Dict, Awaitable, Union
 
 from memoize.entry import CacheKey, CacheEntry
@@ -30,7 +30,7 @@ class UpdateStatuses(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    def mark_update_aborted(self, key: CacheKey, exception: Exception) -> None:
+    def mark_update_aborted(self, key: CacheKey, exception: Union[Exception, CancelledError]) -> None:
         """Informs that update failed to complete.
         Calls to 'is_being_updated' will return False until 'mark_being_updated' will be called.
         Accepts exception to propagate it across all clients awaiting an update."""
@@ -79,7 +79,7 @@ class InMemoryLocks(UpdateStatuses):
         update = self._updates_in_progress.pop(key)
         update.set_result(entry)
 
-    def mark_update_aborted(self, key: CacheKey, exception: Exception) -> None:
+    def mark_update_aborted(self, key: CacheKey, exception: Union[Exception, CancelledError]) -> None:
         if key not in self._updates_in_progress:
             raise ValueError('Key {} is not being updated'.format(key))
         update = self._updates_in_progress.pop(key)

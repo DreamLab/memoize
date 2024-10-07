@@ -6,7 +6,7 @@ import asyncio
 import datetime
 import functools
 import logging
-from asyncio import Future
+from asyncio import Future, CancelledError
 from typing import Optional, Callable
 
 from memoize.configuration import CacheConfiguration, NotConfiguredCacheCalledException, \
@@ -17,8 +17,8 @@ from memoize.invalidation import InvalidationSupport
 from memoize.statuses import UpdateStatuses, InMemoryLocks
 
 
-def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration = None,
-            invalidation: InvalidationSupport = None, update_statuses: UpdateStatuses = None):
+def memoize(method: Optional[Callable] = None, configuration: Optional[CacheConfiguration] = None,
+            invalidation: Optional[InvalidationSupport] = None, update_statuses: Optional[UpdateStatuses] = None):
     """Wraps function with memoization.
 
     If entry reaches time it should be updated, refresh is performed in background,
@@ -116,14 +116,14 @@ def memoize(method: Optional[Callable] = None, configuration: CacheConfiguration
                 logger.debug('Timeout for %s: %s', key, e)
                 update_statuses.mark_update_aborted(key, e)
                 raise CachedMethodFailedException('Refresh timed out') from e
-            except Exception as e:
+            except (Exception, CancelledError) as e:
                 logger.debug('Error while refreshing cache for %s: %s', key, e)
                 update_statuses.mark_update_aborted(key, e)
                 raise CachedMethodFailedException('Refresh failed to complete') from e
 
     @functools.wraps(method)
     async def wrapper(*args, **kwargs):
-        if not configuration.configured():
+        if configuration is None or not configuration.configured():
             raise NotConfiguredCacheCalledException()
 
         configuration_snapshot = MutableCacheConfiguration.initialized_with(configuration)

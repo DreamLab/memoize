@@ -1,5 +1,6 @@
 import asyncio
 import time
+from asyncio import CancelledError
 from datetime import timedelta
 from unittest.mock import Mock
 
@@ -173,6 +174,37 @@ class TestWrapper:
             await res3
         assert context.value.__class__ == CachedMethodFailedException
         assert str(context.value.__cause__) == str(ValueError('stub0'))
+
+    async def test_should_return_cancelled_exception_for_all_concurrent_callers(self):
+        # given
+        value = 0
+
+        @memoize()
+        async def get_value(arg, kwarg=None):
+            new_task = asyncio.create_task(asyncio.sleep(1))
+            new_task.cancel()  # this will raise CancelledError
+            await new_task
+
+        # when
+        res1 = get_value('test', kwarg='args1')
+        res2 = get_value('test', kwarg='args1')
+        res3 = get_value('test', kwarg='args1')
+
+        # then
+        with pytest.raises(Exception) as context:
+            await res1
+        assert context.value.__class__ == CachedMethodFailedException
+        assert str(context.value.__cause__) == str(CancelledError())
+
+        with pytest.raises(Exception) as context:
+            await res2
+        assert context.value.__class__ == CachedMethodFailedException
+        assert str(context.value.__cause__) == str(CancelledError())
+
+        with pytest.raises(Exception) as context:
+            await res3
+        assert context.value.__class__ == CachedMethodFailedException
+        assert str(context.value.__cause__) == str(CancelledError())
 
     async def test_should_return_timeout_for_all_concurrent_callers(self):
         # given
